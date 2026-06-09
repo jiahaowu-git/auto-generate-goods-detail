@@ -111,18 +111,7 @@ function clearSettings() {
 
     <main class="max-w-3xl mx-auto px-4 py-12">
       <BaseCard class="w-full" padding="lg">
-        <div
-          class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
-        >
-          <h2 class="text-2xl font-bold text-gray-900">API 配置</h2>
-          <a
-            href="wxwork://message?username=wujiahao"
-            target="_blank"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium whitespace-nowrap"
-          >
-            联系吴佳浩
-          </a>
-        </div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-8">API 配置</h2>
 
         <div class="space-y-8">
           <BaseInput

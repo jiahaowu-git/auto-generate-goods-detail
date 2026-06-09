@@ -1,0 +1,25 @@
+{
+  "name": "auto-generate-goods-detail",
+  "private": true,
+  "version": "0.0.1",
+  "author": "jiahaowu-git",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.23",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "unocss": "^0.58.0",
+    "vite": "^5.0.0"
+  }
+}

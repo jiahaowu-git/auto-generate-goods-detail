@@ -24,26 +24,6 @@ export async function uploadFile(file, apiKey) {
   return result.data.download_url;
 }
 
-export async function queryQueueStatus(apiKey) {
-  const response = await fetch(`${BASE_URL}/openapi/v2/queue/status`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("查询队列状态失败");
-  }
-
-  const result = await response.json();
-  if (result.code !== 0) {
-    throw new Error(result.message || "查询队列状态失败");
-  }
-
-  return result.data;
-}
-
 export async function submitTask(nodeInfoList, workflowId, apiKey) {
   const response = await fetch(`${BASE_URL}/task/openapi/create`, {
     method: "POST",

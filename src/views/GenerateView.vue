@@ -2,13 +2,8 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore } from "../stores/settings";
-import {
-  uploadFile,
-  submitTask,
-  queryTaskStatus,
-  queryTaskResult,
-  queryQueueStatus,
-} from "../services/runninghub";
+import { uploadFile, submitTask } from "../services/runninghub";
+import { checkQueueAvailability } from "../services/queue";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import { useHistoryStore } from "../stores/settings";
@@ -113,11 +108,9 @@ const imageFiles = ref([]);
 const imageUrls = ref([]);
 const isUploading = ref(false);
 const isRunning = ref(false);
-const taskStatus = ref("");
 const statusMessage = ref("");
 const generatedImages = ref([]);
 const taskId = ref("");
-const pollingInterval = ref(null);
 const isGlobalLoading = ref(false);
 const loadingMessage = ref("");
 const showQueueWarningModal = ref(false);
@@ -215,12 +208,10 @@ async function startGeneration() {
 
   try {
     statusMessage.value = "正在检查队列状态...";
-    const queueData = await queryQueueStatus(settingsStore.apiKey);
+    const queue = await checkQueueAvailability(settingsStore.apiKey);
 
-    const runningCount = Number(queueData.runningCount) || 0;
-
-    if (runningCount > 3) {
-      queueWarningMessage.value = `当前队列中有 ${runningCount} 个任务正在运行，可能会影响执行速度，建议您等待队列空闲时再提交任务。`;
+    if (!queue.canSubmit) {
+      queueWarningMessage.value = queue.message;
       showQueueWarningModal.value = true;
       isRunning.value = false;
       return;
@@ -255,65 +246,9 @@ async function startGeneration() {
   }
 }
 
-function startPolling() {
-  pollingInterval.value = setInterval(async () => {
-    try {
-      const result = await queryTaskStatus(taskId.value, settingsStore.apiKey);
-      taskStatus.value = result.status;
-
-      if (result.status === "SUCCESS") {
-        statusMessage.value = "任务完成！正在获取结果...";
-        clearInterval(pollingInterval.value);
-        await fetchResults();
-      } else if (result.status === "FAILED") {
-        statusMessage.value = "任务失败";
-        clearInterval(pollingInterval.value);
-        isRunning.value = false;
-      } else if (result.status === "CANCELLED") {
-        statusMessage.value = "任务已取消";
-        clearInterval(pollingInterval.value);
-        isRunning.value = false;
-      } else {
-        statusMessage.value = `任务进行中: ${result.status}...`;
-      }
-    } catch (error) {
-      statusMessage.value = `轮询错误: ${error.message}`;
-    }
-  }, 5000);
-}
-
-async function fetchResults() {
-  try {
-    const result = await queryTaskResult(taskId.value, settingsStore.apiKey);
-
-    if (result.images && result.images.length > 0) {
-      generatedImages.value = result.images;
-      statusMessage.value = `成功生成 ${result.images.length} 张图片！`;
-    } else if (result.outputs) {
-      const images = [];
-      for (const output of result.outputs) {
-        if (output.images) {
-          images.push(...output.images);
-        }
-      }
-      generatedImages.value = images;
-      statusMessage.value = `成功获取 ${images.length} 张图片！`;
-    } else {
-      statusMessage.value = "未找到生成的图片";
-    }
-  } catch (error) {
-    statusMessage.value = `获取结果错误: ${error.message}`;
-  } finally {
-    isRunning.value = false;
-  }
-}
-
 function cancelTask() {
-  if (pollingInterval.value) {
-    clearInterval(pollingInterval.value);
-    pollingInterval.value = null;
-  }
-  taskStatus.value = "CANCELLED";
+  // 本视图提交后立即跳转到详情页，轮询/拉取结果由 HistoryDetailView 负责。
+  // 此处仅做 UI 状态重置。
   statusMessage.value = "任务已取消";
   isRunning.value = false;
 }

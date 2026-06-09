@@ -2,11 +2,8 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useSettingsStore, useHistoryStore } from "../stores/settings";
-import {
-  uploadFile,
-  submitTask,
-  queryQueueStatus,
-} from "../services/runninghub";
+import { uploadFile, submitTask } from "../services/runninghub";
+import { checkQueueAvailability } from "../services/queue";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 
@@ -160,12 +157,10 @@ async function startGeneration() {
 
   try {
     statusMessage.value = "正在检查队列状态...";
-    const queueData = await queryQueueStatus(settingsStore.apiKey);
+    const queue = await checkQueueAvailability(settingsStore.apiKey);
 
-    const runningCount = Number(queueData.runningCount) || 0;
-
-    if (runningCount > 3) {
-      queueWarningMessage.value = `当前队列中有 ${runningCount} 个任务正在运行，可能会影响执行速度，建议您等待队列空闲时再提交任务。`;
+    if (!queue.canSubmit) {
+      queueWarningMessage.value = queue.message;
       showQueueWarningModal.value = true;
       isRunning.value = false;
       return;

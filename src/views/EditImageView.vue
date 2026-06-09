@@ -8,7 +8,9 @@ import {
   queryTaskStatus,
   queryTaskResult,
 } from "../services/runninghub";
+import { checkQueueAvailability } from "../services/queue";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 
 const settingsStore = useSettingsStore();
 const historyStore = useHistoryStore();
@@ -593,6 +595,16 @@ async function startEdit() {
   statusMessage.value = "准备开始...";
 
   try {
+    statusMessage.value = "正在检查队列状态...";
+    const queue = await checkQueueAvailability(settingsStore.apiKey);
+
+    if (!queue.canSubmit) {
+      queueWarningMessage.value = queue.message;
+      showQueueWarningModal.value = true;
+      isRunning.value = false;
+      return;
+    }
+
     statusMessage.value = "正在提交任务...";
     const nodeInfoList = [
       {
@@ -1017,6 +1029,22 @@ async function startEdit() {
       v-if="showMaskModal"
       :show="isUploadingMask"
       message="正在上传遮罩图片，请稍候..."
+    />
+
+    <ConfirmModal
+      :show="showQueueWarningModal"
+      title="队列已满"
+      :message="queueWarningMessage"
+      confirm-text="我知道了"
+      cancel-text=""
+      @confirm="
+        showQueueWarningModal = false;
+        queueWarningMessage = '';
+      "
+      @cancel="
+        showQueueWarningModal = false;
+        queueWarningMessage = '';
+      "
     />
   </div>
 </template>

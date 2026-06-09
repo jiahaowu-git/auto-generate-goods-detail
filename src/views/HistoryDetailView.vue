@@ -170,7 +170,7 @@ async function startPolling() {
     try {
       const statusResult = await queryTaskStatus(taskId, settingsStore.apiKey);
 
-      currentStatus.value = statusResult || "";
+      currentStatus.value = statusResult.status || "";
       historyStore
         .updateHistoryStatus(taskId, currentStatus.value)
         .catch((err) => {

@@ -70,17 +70,22 @@ export async function submitTask(nodeInfoList, workflowId, apiKey) {
   return result.data.taskId;
 }
 
+/**
+ * 查询任务状态。
+ *
+ * 使用 RunningHub OpenAPI V2 接口 `/openapi/v2/query`（旧 `/task/openapi/status` 已废弃）。
+ * 返回完整响应对象，包含 taskId、status、errorCode、errorMessage、results 等字段。
+ *
+ * 业务错误（任务 FAILED）会以 apiCode: true 抛出，调用方可据此区分网络异常与业务异常。
+ */
 export async function queryTaskStatus(taskId, apiKey) {
-  const response = await fetch(`${BASE_URL}/task/openapi/status`, {
+  const response = await fetch(`${BASE_URL}/openapi/v2/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      apiKey: apiKey,
-      taskId: taskId,
-    }),
+    body: JSON.stringify({ taskId }),
   });
 
   if (!response.ok) {
@@ -88,14 +93,16 @@ export async function queryTaskStatus(taskId, apiKey) {
   }
 
   const result = await response.json();
-  if (result.code !== 0) {
-    const error = new Error(result.msg || "查询任务状态失败");
-    error.code = result.code;
+
+  // 业务错误：任务状态为 FAILED
+  if (result.status === "FAILED") {
+    const error = new Error(result.errorMessage || "任务执行失败");
+    error.code = result.errorCode;
     error.apiCode = true;
     throw error;
   }
 
-  return result.data;
+  return result;
 }
 
 export async function cancelTask(taskId, apiKey) {

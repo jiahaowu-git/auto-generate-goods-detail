@@ -194,4 +194,3 @@ A: 历史列表页右上角"清空全部"按钮，或在浏览器 DevTools → A
 
 - 作者：jiahaowu-git（[GitHub](https://github.com/jiahaowu-git)）
 - 版本：见 [package.json](package.json) `version` 字段
-- 联系：`wxwork://message?username=wujiahao`

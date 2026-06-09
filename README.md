@@ -83,14 +83,13 @@ auto-generate-goods-detail/
 │   │   ├── ConfirmModal.vue    # 确认弹窗
 │   │   └── LoadingOverlay.vue  # 全局加载遮罩
 │   ├── router/
-│   │   └── index.js            # 路由表 + 锁屏守卫
+│   │   └── index.js            # 路由表
 │   ├── services/
 │   │   ├── db.js               # IndexedDB 封装（Promise API）
 │   │   ├── migration.js        # localStorage → IndexedDB 迁移
-│   │   ├── runninghub.js       # RunningHub API 客户端
-│   │   └── workflow.js         # （已删除）原节点构建逻辑
+│   │   ├── queue.js            # 队列容量检查
+│   │   └── runninghub.js       # RunningHub API 客户端
 │   ├── stores/
-│   │   ├── lock.js             # 锁屏状态
 │   │   └── settings.js         # 配置（localStorage）+ 历史（IndexedDB）
 │   ├── styles/
 │   │   └── common.css          # 全局样式
@@ -100,8 +99,7 @@ auto-generate-goods-detail/
 │   │   ├── EditImageView.vue           # 单图编辑（含遮罩）
 │   │   ├── HistoryListView.vue         # 历史列表
 │   │   ├── HistoryDetailView.vue       # 历史详情（含轮询）
-│   │   ├── SettingsView.vue            # 配置
-│   │   └── LockView.vue                # 锁屏
+│   │   └── SettingsView.vue            # 配置
 │   ├── App.vue
 │   └── main.js                 # 入口：openDB → migrate → mount
 ├── index.html
@@ -120,13 +118,10 @@ auto-generate-goods-detail/
 | `/history` | HistoryListView | 历史记录列表 |
 | `/history/:taskId` | HistoryDetailView | 历史详情（实时轮询） |
 | `/settings` | SettingsView | API 配置 |
-| `/lock` | LockView | 锁屏页（未解锁自动跳转） |
-
-所有非 `/lock` 路由在 `router.beforeEach` 中检查 `useLockStore().isUnlocked`，未解锁则重定向到锁屏页。
 
 ## 首次使用配置
 
-1. 打开应用 → 输入锁屏密码（默认 `jssk123456`，可在 [src/stores/lock.js](src/stores/lock.js) 修改）解锁
+1. 打开应用
 2. 进入 **设置** 页面，填写：
    - **RunningHub API Key**（必填）
    - **生成详情页 Workflow ID**

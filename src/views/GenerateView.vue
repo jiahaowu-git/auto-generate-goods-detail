@@ -7,6 +7,7 @@ import { checkQueueAvailability } from "../services/queue";
 import { useAlertModal } from "../composables/useAlertModal";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
+import AppNav from "../components/AppNav.vue";
 import { useHistoryStore } from "../stores/settings";
 
 // 图片节点：129-134，按上传数量依次填入

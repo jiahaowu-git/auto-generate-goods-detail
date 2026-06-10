@@ -12,6 +12,7 @@ import { checkQueueAvailability } from "../services/queue";
 import { useAlertModal } from "../composables/useAlertModal";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
+import AppNav from "../components/AppNav.vue";
 
 const settingsStore = useSettingsStore();
 const historyStore = useHistoryStore();

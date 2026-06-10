@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useHistoryStore } from "../stores/settings";
 import ConfirmModal from "../components/ConfirmModal.vue";
+import AppNav from "../components/AppNav.vue";
 
 const historyStore = useHistoryStore();
 const router = useRouter();

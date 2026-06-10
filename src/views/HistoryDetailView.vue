@@ -3,6 +3,9 @@ import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useSettingsStore, useHistoryStore } from "../stores/settings";
 import { queryTaskStatus, queryTaskResult } from "../services/runninghub";
+import { useAlertModal } from "../composables/useAlertModal";
+import AppNav from "../components/AppNav.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -18,6 +21,9 @@ const statusMessage = ref("");
 const generatedImages = ref([]);
 const errorMessage = ref("");
 const pollingInterval = ref(null);
+
+const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
+  useAlertModal();
 
 const statusText = computed(() => {
   const statusMap = {
@@ -436,73 +442,7 @@ async function tryRecoverPartialResults(taskResult) {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-    <header class="bg-white shadow-sm">
-      <nav
-        class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center"
-      >
-        <h1 class="text-2xl font-bold text-indigo-600">自动生成产品详情页</h1>
-        <div class="flex gap-2 bg-gray-100 p-1 rounded-full">
-          <router-link
-            to="/"
-            class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
-            :class="{
-              'bg-indigo-600 text-white shadow-md': $route.path === '/',
-              'text-gray-600 hover:bg-white hover:shadow-sm':
-                $route.path !== '/',
-            }"
-          >
-            生成详情页
-          </router-link>
-          <router-link
-            to="/single-image-generate"
-            class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
-            :class="{
-              'bg-indigo-600 text-white shadow-md':
-                $route.path === '/single-image-generate',
-              'text-gray-600 hover:bg-white hover:shadow-sm':
-                $route.path !== '/single-image-generate',
-            }"
-          >
-            单图生成
-          </router-link>
-          <router-link
-            to="/edit-image"
-            class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
-            :class="{
-              'bg-indigo-600 text-white shadow-md':
-                $route.path === '/edit-image',
-              'text-gray-600 hover:bg-white hover:shadow-sm':
-                $route.path !== '/edit-image',
-            }"
-          >
-            单图编辑
-          </router-link>
-          <router-link
-            to="/history"
-            class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
-            :class="{
-              'bg-indigo-600 text-white shadow-md':
-                $route.path.includes('/history'),
-              'text-gray-600 hover:bg-white hover:shadow-sm':
-                !$route.path.includes('/history'),
-            }"
-          >
-            历史记录
-          </router-link>
-          <router-link
-            to="/settings"
-            class="px-5 py-2 rounded-full text-sm font-medium transition-all duration-200"
-            :class="{
-              'bg-indigo-600 text-white shadow-md': $route.path === '/settings',
-              'text-gray-600 hover:bg-white hover:shadow-sm':
-                $route.path !== '/settings',
-            }"
-          >
-            设置
-          </router-link>
-        </div>
-      </nav>
-    </header>
+    <AppNav history-match="includes" />
 
     <main class="max-w-6xl mx-auto px-4 py-8">
       <div class="mb-6 flex items-center justify-between gap-3 flex-wrap">

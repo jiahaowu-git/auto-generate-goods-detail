@@ -6,6 +6,7 @@ import BaseCard from "../components/ui/BaseCard.vue";
 import BaseInput from "../components/ui/BaseInput.vue";
 import BaseButton from "../components/ui/BaseButton.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
+import AppNav from "../components/AppNav.vue";
 import packageJson from "../../package.json";
 
 const settingsStore = useSettingsStore();

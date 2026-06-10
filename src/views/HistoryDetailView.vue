@@ -187,13 +187,21 @@ async function startPolling() {
         pollingInterval.value = null;
         await fetchResults();
       } else if (currentStatus.value === "FAILED") {
+        // 先停轮询，防止恢复过程中再次触发
+        clearInterval(pollingInterval.value);
+        pollingInterval.value = null;
+
+        // 尝试从子任务恢复部分结果
+        const recovered = await tryRecoverPartialResults(statusResult);
+        if (recovered) {
+          return;
+        }
+
         errorMessage.value = "任务执行失败";
         statusMessage.value = "任务执行失败";
         historyStore.updateHistoryStatus(taskId, "FAILED", []).catch((err) => {
           console.error("[history] 更新状态失败：", err);
         });
-        clearInterval(pollingInterval.value);
-        pollingInterval.value = null;
       } else if (currentStatus.value === "RUNNING") {
         statusMessage.value = "任务运行中，请稍候...";
       } else if (currentStatus.value === "QUEUED") {
@@ -259,6 +267,12 @@ async function fetchResults() {
         statusMessage.value = "未找到生成的图片";
       }
     } else if (result.status === "FAILED") {
+      // 尝试从子任务恢复部分结果
+      const recovered = await tryRecoverPartialResults(result);
+      if (recovered) {
+        return;
+      }
+
       errorMessage.value = result.errorMessage || "未知错误";
       statusMessage.value = "任务执行失败";
       historyStore.updateHistoryStatus(taskId, "FAILED", []).catch((err) => {
@@ -309,6 +323,89 @@ async function downloadAllImages() {
 
 function goBack() {
   router.push("/history");
+}
+
+/**
+ * 从 taskUsageList 中逐个查询 SUCCESS 子任务的结果。
+ *
+ * 用途：主任务 FAILED 时，子任务可能仍有成功结果；
+ * 此时遍历 taskUsageList 拉取每个 SUCCESS 子任务的图片并汇总。
+ *
+ * 单个子任务失败不影响其他子任务的收集。
+ *
+ * @param {Array} taskUsageList 接口返回的子任务列表
+ * @returns {Promise<string[]>} 收集到的图片 URL 数组（按子任务顺序拼接）
+ */
+async function tryFetchPartialResults(taskUsageList) {
+  if (!Array.isArray(taskUsageList) || taskUsageList.length === 0) {
+    return [];
+  }
+
+  const successEntries = taskUsageList.filter(
+    (item) => item && item.taskStatus === "SUCCESS" && item.taskId,
+  );
+
+  if (successEntries.length === 0) return [];
+
+  const allImages = [];
+  for (const entry of successEntries) {
+    try {
+      const subResult = await queryTaskResult(
+        entry.taskId,
+        settingsStore.apiKey,
+      );
+      if (Array.isArray(subResult.results) && subResult.results.length > 0) {
+        const urls = subResult.results
+          .map((item) => item && item.url)
+          .filter(Boolean);
+        allImages.push(...urls);
+      }
+    } catch (err) {
+      console.error(`[history] 获取子任务 ${entry.taskId} 结果失败：`, err);
+    }
+  }
+
+  return allImages;
+}
+
+/**
+ * 尝试从失败的父任务中恢复部分子任务结果。
+ *
+ * 当查询结果 status === "FAILED" 且 parentTaskId === null（说明这是顶层任务），
+ * 且 taskUsageList 中存在 SUCCESS 子任务时：
+ * 1. 收集所有 SUCCESS 子任务的图片
+ * 2. 将图片存入 generatedImages 与历史记录
+ * 3. 更新 errorMessage / statusMessage 提示"部分成功"
+ *
+ * @returns {Promise<boolean>} true 表示成功恢复了部分结果
+ */
+async function tryRecoverPartialResults(taskResult) {
+  if (!taskResult) return false;
+  if (taskResult.parentTaskId !== null) return false;
+  if (!Array.isArray(taskResult.taskUsageList)) return false;
+
+  const partialImages = await tryFetchPartialResults(taskResult.taskUsageList);
+  if (partialImages.length === 0) return false;
+
+  generatedImages.value = partialImages;
+
+  historyStore
+    .updateHistoryStatus(taskId, "FAILED", partialImages)
+    .catch((err) => {
+      console.error("[history] 更新部分结果失败：", err);
+    });
+
+  if (history.value) {
+    history.value.resultImages = partialImages;
+  }
+
+  const reason =
+    taskResult.errorMessage ||
+    `errorCode ${taskResult.errorCode}` ||
+    "未知错误";
+  errorMessage.value = `主任务执行失败（${reason}），但已从 ${partialImages.length} 张子任务结果中恢复部分图片。`;
+  statusMessage.value = `部分成功：已恢复 ${partialImages.length} 张图片`;
+  return true;
 }
 </script>
 

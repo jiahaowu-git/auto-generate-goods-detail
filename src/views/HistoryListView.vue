@@ -1,10 +1,18 @@
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useHistoryStore } from "../stores/settings";
+import ConfirmModal from "../components/ConfirmModal.vue";
 
 const historyStore = useHistoryStore();
 const router = useRouter();
+
+// 弹窗状态：确认清空 / 确认删除 / 错误提示
+const showClearModal = ref(false);
+const showDeleteModal = ref(false);
+const pendingDeleteId = ref(null);
+const showErrorModal = ref(false);
+const errorModalMessage = ref("");
 
 // 挂载时从 IndexedDB 异步加载历史记录
 onMounted(async () => {
@@ -15,13 +23,42 @@ function goToDetail(taskId) {
   router.push(`/history/${taskId}`);
 }
 
-async function clearAll() {
-  if (!confirm("确定要清空全部历史记录吗？")) return;
+function clearAll() {
+  showClearModal.value = true;
+}
+
+async function handleConfirmClear() {
+  showClearModal.value = false;
   try {
     await historyStore.clearHistory();
   } catch (err) {
-    alert(`清空失败: ${err.message || err}`);
+    errorModalMessage.value = `清空失败：${err.message || err}`;
+    showErrorModal.value = true;
   }
+}
+
+function deleteItem(id, event) {
+  event.stopPropagation();
+  pendingDeleteId.value = id;
+  showDeleteModal.value = true;
+}
+
+async function handleConfirmDelete() {
+  showDeleteModal.value = false;
+  const id = pendingDeleteId.value;
+  pendingDeleteId.value = null;
+  if (id == null) return;
+  try {
+    await historyStore.deleteHistory(id);
+  } catch (err) {
+    errorModalMessage.value = `删除失败：${err.message || err}`;
+    showErrorModal.value = true;
+  }
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false;
+  pendingDeleteId.value = null;
 }
 
 function truncateText(text, maxLength = 20) {
@@ -79,14 +116,6 @@ function getTaskTypeColor(taskType) {
   if (taskType === "single-image-generate")
     return "bg-emerald-100 text-emerald-800";
   return "bg-indigo-100 text-indigo-800";
-}
-
-function deleteItem(id, event) {
-  event.stopPropagation();
-  if (!confirm("确定要删除这条记录吗？")) return;
-  historyStore.deleteHistory(id).catch((err) => {
-    alert(`删除失败: ${err.message || err}`);
-  });
 }
 </script>
 
@@ -304,5 +333,35 @@ function deleteItem(id, event) {
         </div>
       </div>
     </main>
+
+    <ConfirmModal
+      :show="showClearModal"
+      title="清空确认"
+      message="确定要清空所有历史记录吗？此操作不可恢复。"
+      confirm-text="清空"
+      cancel-text="取消"
+      @confirm="handleConfirmClear"
+      @cancel="showClearModal = false"
+    />
+
+    <ConfirmModal
+      :show="showDeleteModal"
+      title="删除确认"
+      message="确定要删除这条历史记录吗？"
+      confirm-text="删除"
+      cancel-text="取消"
+      @confirm="handleConfirmDelete"
+      @cancel="cancelDelete"
+    />
+
+    <ConfirmModal
+      :show="showErrorModal"
+      title="操作失败"
+      :message="errorModalMessage"
+      confirm-text="知道了"
+      cancel-text=""
+      @confirm="showErrorModal = false"
+      @cancel="showErrorModal = false"
+    />
   </div>
 </template>

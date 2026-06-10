@@ -326,6 +326,31 @@ function goBack() {
 }
 
 /**
+ * 手动刷新任务状态。
+ * 复用 fetchResults：对 SUCCESS/FAILED 直接拉取结果并尝试恢复部分子任务，
+ * 对 RUNNING/QUEUED 自动重启轮询。
+ */
+async function refreshTask() {
+  statusMessage.value = "正在刷新任务状态...";
+  await fetchResults();
+}
+
+/**
+ * 再次生成：根据任务类型跳转到对应的生成页面，
+ * 让用户使用相同参数重新提交（参数回填不在本次范围内）。
+ */
+function regenerate() {
+  const taskType = history.value?.taskType;
+  if (taskType === "image-edit") {
+    router.push("/edit-image");
+  } else if (taskType === "single-image-generate") {
+    router.push("/single-image-generate");
+  } else {
+    router.push("/");
+  }
+}
+
+/**
  * 从 taskUsageList 中逐个查询 SUCCESS 子任务的结果。
  *
  * 用途：主任务 FAILED 时，子任务可能仍有成功结果；
@@ -480,12 +505,33 @@ async function tryRecoverPartialResults(taskResult) {
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-8">
-      <button
-        @click="goBack"
-        class="mb-6 inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-colors font-medium"
-      >
-        ← 返回历史记录
-      </button>
+      <div class="mb-6 flex items-center justify-between gap-3 flex-wrap">
+        <!-- 左侧按钮组：返回历史记录 -->
+        <div class="flex gap-3">
+          <button
+            @click="goBack"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-colors font-medium"
+          >
+            ← 返回历史记录
+          </button>
+        </div>
+
+        <!-- 右侧按钮组：刷新 / 再次生成 -->
+        <div class="flex gap-3">
+          <button
+            @click="refreshTask"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-colors font-medium"
+          >
+            🔄 刷新
+          </button>
+          <button
+            @click="regenerate"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors font-medium"
+          >
+            ✨ 再次生成
+          </button>
+        </div>
+      </div>
 
       <div
         v-if="!history"

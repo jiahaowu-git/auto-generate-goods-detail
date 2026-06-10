@@ -266,6 +266,11 @@ async function fetchResults() {
       history.value.status = currentStatus.value;
     }
 
+    // 异常状态：status 为空但 errorCode 存在
+    if (handleAbnormalStatus(result)) {
+      return;
+    }
+
     if (result.status === "SUCCESS") {
       if (result.results && result.results.length > 0) {
         generatedImages.value = result.results.map((item) => item.url);

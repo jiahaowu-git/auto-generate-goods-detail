@@ -47,7 +47,7 @@ function clearSettings() {
 
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-    <AppNav sticky />
+    <AppNav />
 
     <main class="max-w-3xl mx-auto px-4 py-12">
       <BaseCard class="w-full" padding="lg">

@@ -187,6 +187,15 @@ async function startPolling() {
         history.value.status = currentStatus.value;
       }
 
+      // 异常状态：status 为空但 errorCode 存在
+      // 典型场景：任务 ID 不存在或已被清理（errorCode=1004）
+      // 视为失败，停止轮询
+      if (handleAbnormalStatus(statusResult)) {
+        clearInterval(pollingInterval.value);
+        pollingInterval.value = null;
+        return;
+      }
+
       if (currentStatus.value === "SUCCESS") {
         statusMessage.value = "任务完成！正在获取结果...";
         clearInterval(pollingInterval.value);
@@ -397,6 +406,38 @@ async function tryFetchPartialResults(taskUsageList) {
   }
 
   return allImages;
+}
+
+/**
+ * 处理异常状态：API 返回的 status 为空字符串但 errorCode 存在
+ * （典型场景：任务 ID 不存在 / 已被清理，errorCode=1004）。
+ *
+ * 这种情况下任务实际上不可访问，应当按失败处理并停止轮询，
+ * 避免持续请求一个已消失的任务。
+ *
+ * @param {object} result queryTaskStatus / queryTaskResult 返回对象
+ * @returns {boolean} true 表示已识别为异常并按失败处理，false 表示正常状态
+ */
+function handleAbnormalStatus(result) {
+  if (!result) return false;
+  if (result.status) return false; // 有 status 字段，走正常分支
+
+  // status 为空且 errorCode 存在 → 视为失败
+  const codeText = result.errorCode ? `（code ${result.errorCode}）` : "";
+  const msg = result.errorMessage || "任务状态异常";
+  errorMessage.value = `任务异常 ${codeText}：${msg}`;
+  statusMessage.value = "任务执行失败";
+  currentStatus.value = "FAILED";
+
+  if (history.value) {
+    history.value.status = "FAILED";
+  }
+
+  historyStore.updateHistoryStatus(taskId, "FAILED", []).catch((err) => {
+    console.error("[history] 更新状态失败：", err);
+  });
+
+  return true;
 }
 
 /**

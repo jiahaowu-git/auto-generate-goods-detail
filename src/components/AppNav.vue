@@ -2,7 +2,7 @@
 import { useRoute } from "vue-router";
 
 /**
- * 应用顶部导航栏公共组件。
+ * 应用顶部导航栏公共组件（始终吸顶）。
  *
  * 详细使用文档见 docs/APP_NAV.md。
  *
@@ -10,17 +10,12 @@ import { useRoute } from "vue-router";
  * - historyMatch: 历史记录链接的匹配模式
  *   - 'exact'（默认）：精确匹配 /history
  *   - 'includes'：包含 /history，用于 /history/:taskId 等子路由
- * - sticky: 是否启用 sticky 顶部吸顶样式
  */
 const props = defineProps({
   historyMatch: {
     type: String,
     default: "exact",
     validator: (value) => ["exact", "includes"].includes(value),
-  },
-  sticky: {
-    type: Boolean,
-    default: false,
   },
 });
 
@@ -43,12 +38,7 @@ function isActive(to) {
 </script>
 
 <template>
-  <header
-    :class="[
-      'bg-white',
-      sticky ? 'border-b border-gray-200 sticky top-0 z-10' : 'shadow-sm',
-    ]"
-  >
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
     <nav
       class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3 flex-wrap"
     >

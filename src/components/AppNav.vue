@@ -38,7 +38,7 @@ function isActive(to) {
 </script>
 
 <template>
-  <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+  <header class="bg-white border-b border-gray-200 shadow-md sticky top-0 z-10">
     <nav
       class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center gap-3 flex-wrap"
     >

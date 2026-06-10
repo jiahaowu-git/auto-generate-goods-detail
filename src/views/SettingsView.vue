@@ -1,12 +1,16 @@
 <script setup>
 import { ref } from "vue";
 import { useSettingsStore } from "../stores/settings";
+import { useAlertModal } from "../composables/useAlertModal";
 import BaseCard from "../components/ui/BaseCard.vue";
 import BaseInput from "../components/ui/BaseInput.vue";
 import BaseButton from "../components/ui/BaseButton.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
 import packageJson from "../../package.json";
 
 const settingsStore = useSettingsStore();
+const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
+  useAlertModal();
 
 const apiKey = ref(settingsStore.apiKey);
 const workflowId = ref(settingsStore.workflowId);
@@ -24,7 +28,7 @@ function saveSettings() {
   settingsStore.setSingleImageGenerateWorkflowId(
     singleImageGenerateWorkflowId.value,
   );
-  alert("配置保存成功！");
+  showAlert("保存成功", "配置已保存。");
 }
 
 function clearSettings() {
@@ -36,7 +40,7 @@ function clearSettings() {
   settingsStore.clearWorkflowId();
   settingsStore.clearImageEditWorkflowId();
   settingsStore.clearSingleImageGenerateWorkflowId();
-  alert("配置已清除！");
+  showAlert("清除成功", "配置已清除。");
 }
 </script>
 
@@ -204,5 +208,15 @@ function clearSettings() {
         </div>
       </BaseCard>
     </main>
+
+    <ConfirmModal
+      :show="showAlertModal"
+      :title="alertTitle"
+      :message="alertMessage"
+      confirm-text="我知道了"
+      cancel-text=""
+      @confirm="closeAlert"
+      @cancel="closeAlert"
+    />
   </div>
 </template>

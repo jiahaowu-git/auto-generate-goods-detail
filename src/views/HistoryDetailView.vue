@@ -291,7 +291,7 @@ async function fetchResults() {
 
 async function downloadAllImages() {
   if (generatedImages.value.length === 0) {
-    alert("没有可下载的图片");
+    showAlert("无法下载", "当前任务没有可下载的图片。");
     return;
   }
 
@@ -896,5 +896,15 @@ async function tryRecoverPartialResults(taskResult) {
         </div>
       </template>
     </main>
+
+    <ConfirmModal
+      :show="showAlertModal"
+      :title="alertTitle"
+      :message="alertMessage"
+      confirm-text="我知道了"
+      cancel-text=""
+      @confirm="closeAlert"
+      @cancel="closeAlert"
+    />
   </div>
 </template>

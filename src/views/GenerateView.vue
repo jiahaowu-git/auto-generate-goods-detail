@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useSettingsStore } from "../stores/settings";
 import { uploadFile, submitTask } from "../services/runninghub";
 import { checkQueueAvailability } from "../services/queue";
+import { useAlertModal } from "../composables/useAlertModal";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import { useHistoryStore } from "../stores/settings";
@@ -114,6 +115,9 @@ const taskId = ref("");
 const isGlobalLoading = ref(false);
 const loadingMessage = ref("");
 const showQueueWarningModal = ref(false);
+
+const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
+  useAlertModal();
 const queueWarningMessage = ref("");
 
 const hasApiKey = computed(() => !!settingsStore.apiKey);
@@ -129,7 +133,7 @@ const imageRatioOptions = [
 
 async function handleFileSelect(event) {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法上传", "请先在设置页面配置 API Key。");
     event.target.value = "";
     return;
   }
@@ -138,7 +142,7 @@ async function handleFileSelect(event) {
   if (files.length === 0) return;
 
   if (imageFiles.value.length + files.length > 6) {
-    alert("最多只能上传 6 张图片");
+    showAlert("超出限制", "最多只能上传 6 张图片。");
     event.target.value = "";
     return;
   }
@@ -155,7 +159,7 @@ async function handleFileSelect(event) {
     }
     loadingMessage.value = "图片上传完成！";
   } catch (error) {
-    alert(`上传失败: ${error.message}`);
+    showAlert("上传失败", `上传失败：${error.message}`);
     event.target.value = "";
   } finally {
     setTimeout(() => {
@@ -183,22 +187,22 @@ async function uploadImages() {
 
 async function startGeneration() {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法提交", "请先在设置页面配置 API Key。");
     return;
   }
 
   if (!hasWorkflowId.value) {
-    alert("请先在设置页面配置 Workflow ID");
+    showAlert("无法提交", "请先在设置页面配置 Workflow ID。");
     return;
   }
 
   if (imageFiles.value.length === 0) {
-    alert("请至少上传一张产品图片");
+    showAlert("无法提交", "请至少上传一张产品图片。");
     return;
   }
 
   if (!formData.value.goods_name) {
-    alert("请输入产品名称");
+    showAlert("无法提交", "请输入产品名称。");
     return;
   }
 
@@ -583,6 +587,16 @@ function handleCloseQueueWarning() {
       confirmText="我知道了"
       :showCancel="false"
       @confirm="handleCloseQueueWarning"
+    />
+
+    <ConfirmModal
+      :show="showAlertModal"
+      :title="alertTitle"
+      :message="alertMessage"
+      confirmText="我知道了"
+      :showCancel="false"
+      @confirm="closeAlert"
+      @cancel="closeAlert"
     />
   </div>
 </template>

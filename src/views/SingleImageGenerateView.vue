@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useSettingsStore, useHistoryStore } from "../stores/settings";
 import { uploadFile, submitTask } from "../services/runninghub";
 import { checkQueueAvailability } from "../services/queue";
+import { useAlertModal } from "../composables/useAlertModal";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 
@@ -57,7 +58,7 @@ const canStartGeneration = computed(() => {
 
 async function handleFileSelect(event) {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法上传", "请先在设置页面配置 API Key。");
     event.target.value = "";
     return;
   }
@@ -66,7 +67,7 @@ async function handleFileSelect(event) {
   if (files.length === 0) return;
 
   if (imageFiles.value.length + files.length > maxImageCount) {
-    alert(`最多只能上传 ${maxImageCount} 张图片`);
+    showAlert("超出限制", `最多只能上传 ${maxImageCount} 张图片。`);
     event.target.value = "";
     return;
   }
@@ -83,7 +84,7 @@ async function handleFileSelect(event) {
     }
     loadingMessage.value = "图片上传完成！";
   } catch (error) {
-    alert(`上传失败: ${error.message}`);
+    showAlert("上传失败", `上传失败：${error.message}`);
   } finally {
     setTimeout(() => {
       isGlobalLoading.value = false;
@@ -133,22 +134,22 @@ function buildSingleImageNodeInfoList() {
 
 async function startGeneration() {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法提交", "请先在设置页面配置 API Key。");
     return;
   }
 
   if (!hasWorkflowId.value) {
-    alert("请先在设置页面配置单图生成 Workflow ID");
+    showAlert("无法提交", "请先在设置页面配置单图生成 Workflow ID。");
     return;
   }
 
   if (imageFiles.value.length === 0) {
-    alert("请至少上传一张图片");
+    showAlert("无法提交", "请至少上传一张图片。");
     return;
   }
 
   if (!formData.value.prompt.trim()) {
-    alert("请输入用户提示词");
+    showAlert("无法提交", "请输入用户提示词。");
     return;
   }
 
@@ -448,6 +449,16 @@ function handleCloseQueueWarning() {
       confirmText="我知道了"
       :showCancel="false"
       @confirm="handleCloseQueueWarning"
+    />
+
+    <ConfirmModal
+      :show="showAlertModal"
+      :title="alertTitle"
+      :message="alertMessage"
+      confirmText="我知道了"
+      :showCancel="false"
+      @confirm="closeAlert"
+      @cancel="closeAlert"
     />
   </div>
 </template>

@@ -9,6 +9,7 @@ import {
   queryTaskResult,
 } from "../services/runninghub";
 import { checkQueueAvailability } from "../services/queue";
+import { useAlertModal } from "../composables/useAlertModal";
 import LoadingOverlay from "../components/LoadingOverlay.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 
@@ -29,6 +30,11 @@ const generatedImage = ref(null);
 const taskId = ref("");
 const pollingInterval = ref(null);
 const showUploadDialog = ref(false);
+const showQueueWarningModal = ref(false);
+const queueWarningMessage = ref("");
+
+const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
+  useAlertModal();
 
 // 遮罩编辑器状态
 const showMaskModal = ref(false);
@@ -79,7 +85,7 @@ const canStartEdit = computed(() => {
 
 async function handleFileSelect(event) {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法上传", "请先在设置页面配置 API Key。");
     event.target.value = "";
     return;
   }
@@ -88,7 +94,7 @@ async function handleFileSelect(event) {
   if (files.length === 0) return;
 
   if (files.length > 1) {
-    alert("单图编辑只能上传一张图片");
+    showAlert("超出限制", "单图编辑只能上传一张图片。");
     event.target.value = "";
     return;
   }
@@ -105,7 +111,7 @@ async function handleFileSelect(event) {
     showUploadDialog.value = false;
   } catch (error) {
     showUploadDialog.value = false;
-    alert(`上传失败: ${error.message}`);
+    showAlert("上传失败", `上传失败：${error.message}`);
     imageFile.value = null;
     event.target.value = "";
   } finally {
@@ -183,14 +189,14 @@ async function initCanvas() {
       undoStack.value = [];
     } catch (err) {
       console.error("绘制图片到 canvas 失败：", err);
-      alert("加载图片失败：无法绘制到画布（可能 CORS 限制）");
+      showAlert("加载失败", "加载图片失败：无法绘制到画布（可能 CORS 限制）。");
     } finally {
       if (blobUrl) URL.revokeObjectURL(blobUrl);
     }
   };
   img.onerror = () => {
     if (blobUrl) URL.revokeObjectURL(blobUrl);
-    alert("加载图片失败：图像解码异常");
+    showAlert("加载失败", "加载图片失败：图像解码异常。");
   };
   img.src = useBlob ? blobUrl : imageUrl.value;
 }
@@ -465,7 +471,7 @@ async function saveMask() {
     imageUrl.value = cloudUrl;
     showMaskModal.value = false;
   } catch (error) {
-    alert(`保存失败: ${error.message || error}`);
+    showAlert("保存失败", `保存失败：${error.message || error}`);
   } finally {
     isUploadingMask.value = false;
   }
@@ -572,22 +578,22 @@ onUnmounted(() => {
 
 async function startEdit() {
   if (!hasApiKey.value) {
-    alert("请先在设置页面配置 API Key");
+    showAlert("无法提交", "请先在设置页面配置 API Key。");
     return;
   }
 
   if (!hasWorkflowId.value) {
-    alert("请先在设置页面配置单图编辑 Workflow ID");
+    showAlert("无法提交", "请先在设置页面配置单图编辑 Workflow ID。");
     return;
   }
 
   if (!imageFile.value) {
-    alert("请上传一张图片");
+    showAlert("无法提交", "请上传一张图片。");
     return;
   }
 
   if (!formData.value.editContent.trim()) {
-    alert("请输入修改内容");
+    showAlert("无法提交", "请输入修改内容。");
     return;
   }
 
@@ -1045,6 +1051,16 @@ async function startEdit() {
         showQueueWarningModal = false;
         queueWarningMessage = '';
       "
+    />
+
+    <ConfirmModal
+      :show="showAlertModal"
+      :title="alertTitle"
+      :message="alertMessage"
+      confirm-text="我知道了"
+      cancel-text=""
+      @confirm="closeAlert"
+      @cancel="closeAlert"
     />
   </div>
 </template>

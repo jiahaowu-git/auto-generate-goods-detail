@@ -49,17 +49,12 @@ function safeRemoveItem(key) {
 export const useSettingsStore = defineStore("settings", () => {
   // api_key 不再硬编码默认值，首次启动时为空，强制用户在设置页填写
   const apiKey = ref(safeGetItem("api_key", ""));
-  const workflowId = ref(
-    safeGetItem("workflow_id", "2036719448488419330"),
-  );
+  const workflowId = ref(safeGetItem("workflow_id", "2064943518187085825"));
   const imageEditWorkflowId = ref(
-    safeGetItem("image_edit_workflow_id", "2036994785130582018"),
+    safeGetItem("image_edit_workflow_id", "2064943629881405441"),
   );
   const singleImageGenerateWorkflowId = ref(
-    safeGetItem(
-      "single_image_generate_workflow_id",
-      "2062069615576047617",
-    ),
+    safeGetItem("single_image_generate_workflow_id", "2064943676937297921"),
   );
 
   watch(apiKey, (newValue) => {
@@ -231,9 +226,7 @@ export const useHistoryStore = defineStore("history", () => {
    */
   async function getHistoryByTaskId(taskId) {
     if (isReady.value) {
-      const inMemory = historyList.value.find(
-        (item) => item.taskId === taskId,
-      );
+      const inMemory = historyList.value.find((item) => item.taskId === taskId);
       if (inMemory) return inMemory;
     }
     try {

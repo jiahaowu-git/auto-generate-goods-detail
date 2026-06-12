@@ -123,7 +123,7 @@ auto-generate-goods-detail/
 1. 打开应用
 2. 进入 **设置** 页面，填写：
    - **RunningHub API Key**（必填）
-   - **生成详情页 Workflow ID**
+   - **商品详情 Workflow ID**
    - **单图编辑 Workflow ID**
    - **单图生成 Workflow ID**
 3. 点击 **保存配置**（写入 localStorage）

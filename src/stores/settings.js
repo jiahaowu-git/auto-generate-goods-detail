@@ -49,7 +49,9 @@ function safeRemoveItem(key) {
 export const useSettingsStore = defineStore("settings", () => {
   // api_key 不再硬编码默认值，首次启动时为空，强制用户在设置页填写
   const apiKey = ref(safeGetItem("api_key", ""));
-  const workflowId = ref(safeGetItem("workflow_id", "2064943518187085825"));
+  const goodsDetailWorkflowId = ref(
+    safeGetItem("goods_detail_workflow_id", "2064943518187085825"),
+  );
   const imageEditWorkflowId = ref(
     safeGetItem("image_edit_workflow_id", "2064943629881405441"),
   );
@@ -62,9 +64,9 @@ export const useSettingsStore = defineStore("settings", () => {
     else safeRemoveItem("api_key");
   });
 
-  watch(workflowId, (newValue) => {
-    if (newValue) safeSetItem("workflow_id", newValue);
-    else safeRemoveItem("workflow_id");
+  watch(goodsDetailWorkflowId, (newValue) => {
+    if (newValue) safeSetItem("goods_detail_workflow_id", newValue);
+    else safeRemoveItem("goods_detail_workflow_id");
   });
 
   watch(imageEditWorkflowId, (newValue) => {
@@ -85,12 +87,12 @@ export const useSettingsStore = defineStore("settings", () => {
     apiKey.value = "";
   }
 
-  function setWorkflowId(id) {
-    workflowId.value = id;
+  function setGoodsDetailWorkflowId(id) {
+    goodsDetailWorkflowId.value = id;
   }
 
-  function clearWorkflowId() {
-    workflowId.value = "";
+  function clearGoodsDetailWorkflowId() {
+    goodsDetailWorkflowId.value = "";
   }
 
   function setImageEditWorkflowId(id) {
@@ -111,13 +113,13 @@ export const useSettingsStore = defineStore("settings", () => {
 
   return {
     apiKey,
-    workflowId,
+    goodsDetailWorkflowId,
     imageEditWorkflowId,
     singleImageGenerateWorkflowId,
     setApiKey,
     clearApiKey,
-    setWorkflowId,
-    clearWorkflowId,
+    setGoodsDetailWorkflowId,
+    clearGoodsDetailWorkflowId,
     setImageEditWorkflowId,
     clearImageEditWorkflowId,
     setSingleImageGenerateWorkflowId,

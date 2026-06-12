@@ -14,7 +14,7 @@ const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
   useAlertModal();
 
 const apiKey = ref(settingsStore.apiKey);
-const workflowId = ref(settingsStore.workflowId);
+const goodsDetailWorkflowId = ref(settingsStore.goodsDetailWorkflowId);
 const imageEditWorkflowId = ref(settingsStore.imageEditWorkflowId);
 const singleImageGenerateWorkflowId = ref(
   settingsStore.singleImageGenerateWorkflowId,
@@ -24,7 +24,7 @@ const appAuthor = packageJson.author;
 
 function saveSettings() {
   settingsStore.setApiKey(apiKey.value);
-  settingsStore.setWorkflowId(workflowId.value);
+  settingsStore.setGoodsDetailWorkflowId(goodsDetailWorkflowId.value);
   settingsStore.setImageEditWorkflowId(imageEditWorkflowId.value);
   settingsStore.setSingleImageGenerateWorkflowId(
     singleImageGenerateWorkflowId.value,
@@ -34,11 +34,11 @@ function saveSettings() {
 
 function clearSettings() {
   apiKey.value = "";
-  workflowId.value = "";
+  goodsDetailWorkflowId.value = "";
   imageEditWorkflowId.value = "";
   singleImageGenerateWorkflowId.value = "";
   settingsStore.clearApiKey();
-  settingsStore.clearWorkflowId();
+  settingsStore.clearGoodsDetailWorkflowId();
   settingsStore.clearImageEditWorkflowId();
   settingsStore.clearSingleImageGenerateWorkflowId();
   showAlert("清除成功", "配置已清除。");
@@ -75,13 +75,13 @@ function clearSettings() {
           </BaseInput>
 
           <BaseInput
-            v-model="workflowId"
-            label="生成详情页 Workflow ID"
+            v-model="goodsDetailWorkflowId"
+            label="商品详情 Workflow ID"
             placeholder="请输入工作流 ID"
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于生成详情页
+                在 RunningHub 平台的工作流模板中获取，用于生成商品详情页
               </span>
             </template>
           </BaseInput>

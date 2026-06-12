@@ -122,7 +122,9 @@ const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
 const queueWarningMessage = ref("");
 
 const hasApiKey = computed(() => !!settingsStore.apiKey);
-const hasWorkflowId = computed(() => !!settingsStore.workflowId);
+const hasGoodsDetailWorkflowId = computed(
+  () => !!settingsStore.goodsDetailWorkflowId,
+);
 
 const imageRatioOptions = [
   { label: "9:16 (竖版)", value: "9:16" },
@@ -192,7 +194,7 @@ async function startGeneration() {
     return;
   }
 
-  if (!hasWorkflowId.value) {
+  if (!hasGoodsDetailWorkflowId.value) {
     showAlert("无法提交", "请先在设置页面配置 Workflow ID。");
     return;
   }
@@ -232,7 +234,7 @@ async function startGeneration() {
     statusMessage.value = "正在提交任务...";
     taskId.value = await submitTask(
       nodeInfoList,
-      settingsStore.workflowId,
+      settingsStore.goodsDetailWorkflowId,
       settingsStore.apiKey,
     );
 
@@ -271,7 +273,7 @@ function handleCloseQueueWarning() {
 
     <main class="max-w-4xl mx-auto px-4 py-8">
       <div
-        v-if="!hasApiKey || !hasWorkflowId"
+        v-if="!hasApiKey || !hasGoodsDetailWorkflowId"
         class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8"
       >
         <p class="text-yellow-800">
@@ -280,8 +282,8 @@ function handleCloseQueueWarning() {
             >设置页面</router-link
           >
           <span v-if="!hasApiKey">配置您的 API Key</span>
-          <span v-if="!hasApiKey && !hasWorkflowId"> 和 </span>
-          <span v-if="!hasWorkflowId">配置 Workflow ID</span>
+          <span v-if="!hasApiKey && !hasGoodsDetailWorkflowId"> 和 </span>
+          <span v-if="!hasGoodsDetailWorkflowId">配置 Workflow ID</span>
         </p>
       </div>
 
@@ -448,7 +450,7 @@ function handleCloseQueueWarning() {
               @click="startGeneration"
               :disabled="
                 !hasApiKey ||
-                !hasWorkflowId ||
+                !hasGoodsDetailWorkflowId ||
                 imageFiles.length === 0 ||
                 !formData.goods_name
               "

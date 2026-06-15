@@ -1,12 +1,13 @@
 # 自动生成产品详情页
 
-> 基于 RunningHub AI 工作流的产品详情页批量生成工具。支持详情页生成、单图生成、单图编辑（带遮罩）三种模式，并提供完整的历史记录与设置管理。
+> 基于 RunningHub AI 工作流的产品详情页批量生成工具。支持详情页生成、无文字详情页生成、单图生成、单图编辑（带遮罩）四种模式，并提供完整的历史记录与设置管理。
 
 ## 项目简介
 
 本工具对接 [RunningHub](https://www.runninghub.cn) 的 AI 工作流能力，帮助运营/设计人员：
 
 - **生成详情页**：上传 1-6 张白底产品图 + 填写产品信息，AI 自动生成详情页图片
+- **生成详情图场景**：与详情页生成使用相同表单，但调用"无文字"工作流，输出无文字叠加的详情图
 - **单图生成**：基于 1-6 张参考图与提示词生成单张 AI 图片
 - **单图编辑**：上传单张图片 + 文字描述，支持画笔遮罩局部重绘
 
@@ -14,12 +15,14 @@
 
 ## 功能特性
 
-- 🎨 **三种生成模式**：详情页生成 / 单图生成 / 单图编辑（带遮罩编辑器）
+- 🎨 **四种生成模式**：详情页生成 / 无文字详情页 / 单图生成 / 单图编辑（带遮罩编辑器）
 - 🖌️ **遮罩编辑器**：圆形/方形画笔、透明度/颜色/大小可调、支持撤销（Ctrl+Z）
 - 📦 **批量管理**：最多 6 张图片、详情页字段齐全（品牌、人群、主题、风格等）
 - 📥 **一键下载**：将生成结果打包为 ZIP 下载
-- 📋 **历史记录**：所有任务自动保存，可查看状态、重新进入详情、删除/清空
+- 📋 **历史记录**：所有任务自动保存，可查看状态、重新进入详情、删除/清空、按 taskType 分类显示
 - 💾 **本地存储**：配置存 localStorage、历史存 IndexedDB（GB 级容量）
+- 🧩 **组件化架构**：顶部导航栏（`AppNav`）、确认弹窗（`ConfirmModal`）、全局加载遮罩（`LoadingOverlay`）等可复用组件
+- 🔔 **统一提示**：所有用户提示均走 `useAlertModal` + `ConfirmModal`，无浏览器原生 alert/confirm
 
 ## 技术栈
 
@@ -74,13 +77,17 @@ npm run preview
 ```
 auto-generate-goods-detail/
 ├── docs/
+│   ├── APP_NAV.md              # AppNav 顶部导航栏组件文档
 │   └── STORAGE.md              # 客户端存储方案详细文档
 ├── public/                     # 静态资源（favicon、logo）
 ├── src/
 │   ├── components/             # 通用组件
 │   │   ├── ui/                 # 基础 UI 组件（BaseButton、BaseInput 等）
-│   │   ├── ConfirmModal.vue    # 确认弹窗
+│   │   ├── AppNav.vue          # 顶部导航栏公共组件（吸顶 + 路由高亮）
+│   │   ├── ConfirmModal.vue    # 通用确认/提示弹窗
 │   │   └── LoadingOverlay.vue  # 全局加载遮罩
+│   ├── composables/
+│   │   └── useAlertModal.js    # 提示弹窗状态 composable
 │   ├── router/
 │   │   └── index.js            # 路由表
 │   ├── services/
@@ -94,10 +101,11 @@ auto-generate-goods-detail/
 │   │   └── common.css          # 全局样式
 │   ├── views/                  # 页面组件
 │   │   ├── GenerateView.vue            # 详情页生成
+│   │   ├── GenerateWithoutTextView.vue # 无文字详情页生成
 │   │   ├── SingleImageGenerateView.vue # 单图生成
 │   │   ├── EditImageView.vue           # 单图编辑（含遮罩）
 │   │   ├── HistoryListView.vue         # 历史列表
-│   │   ├── HistoryDetailView.vue       # 历史详情（含轮询）
+│   │   ├── HistoryDetailView.vue       # 历史详情（含轮询 + 失败恢复）
 │   │   └── SettingsView.vue            # 配置
 │   ├── App.vue
 │   └── main.js                 # 入口：openDB → migrate → mount
@@ -122,14 +130,26 @@ auto-generate-goods-detail/
 
 1. 打开应用
 2. 进入 **设置** 页面，填写：
-   - **RunningHub API Key**（必填）
-   - **商品详情 Workflow ID**
-   - **单图编辑 Workflow ID**
-   - **单图生成 Workflow ID**
+   - **RunningHub API Key**（必填，存 localStorage）
+   - **商品详情 Workflow ID**（默认 `2064943518187085825`）
+   - **无文字商品详情 Workflow ID**（默认 `2065355371576913922`）
+   - **单图编辑 Workflow ID**（默认 `2064943629881405441`）
+   - **单图生成 Workflow ID**（默认 `2064943676937297921`）
 3. 点击 **保存配置**（写入 localStorage）
 4. 返回首页即可开始生成
 
-> 配置项未提供默认值，必须由用户在设置页手动填写。API Key 与 Workflow ID 在 [RunningHub](https://www.runninghub.cn) 平台获取。
+> Workflow ID 提供默认值（首次启动可开箱即用），可在设置页修改。API Key 必须由用户手动填写。两者均在 [RunningHub](https://www.runninghub.cn) 平台获取。
+
+### 任务类型（taskType）分类
+
+提交任务时会将 `taskType` 一并写入历史记录，用于在历史列表 / 详情页中按类型显示与按类型"再次生成"：
+
+| taskType | 中文名 | 颜色 | 重新生成路由 | 来源视图 |
+|---|---|---|---|---|
+| `generate` | 生成详情页 | indigo | `/` | GenerateView |
+| `generate-without-text` | 生成详情场景 | cyan | `/generate-without-text` | GenerateWithoutTextView |
+| `single-image-generate` | 单图生成 | emerald | `/single-image-generate` | SingleImageGenerateView |
+| `image-edit` | 单图编辑 | purple | `/edit-image` | EditImageView |
 
 ## 工作流节点说明
 
@@ -141,6 +161,10 @@ auto-generate-goods-detail/
   - 2 张图 → 129、130
   - ……
   - 6 张图 → 129、130、131、132、133、134 全部
+
+### 无文字详情页生成（[GenerateWithoutTextView.vue](src/views/GenerateWithoutTextView.vue)）
+
+与"详情页生成"共用同一份 `buildNodeInfoList`（节点 57-64 + 129-134），仅 `Workflow ID` 不同（由 `goodsDetailWithoutTextWorkflowId` 提供）。taskType 标记为 `generate-without-text`，便于历史分类与"再次生成"。
 
 ### 单图生成（[SingleImageGenerateView.vue](src/views/SingleImageGenerateView.vue) `buildSingleImageNodeInfoList`）
 
@@ -169,6 +193,9 @@ auto-generate-goods-detail/
 - **异步**：所有 IndexedDB 操作是 Promise；store 暴露 `isReady` / `loadError` 状态供 UI 渲染加载/错误态
 - **IndexedDB 写入**：db.js 层用 `toPlain()` 防御性深克隆，剥离 Vue 响应式 Proxy，避免 `DataCloneError`
 - **跳转前 await**：所有"提交任务后跳转详情页"流程必须 `await store.addHistory()`，否则会因 IDB 写入未完成导致详情页查询失败
+- **统一提示**：业务中**禁止**使用浏览器原生 `alert` / `confirm`；必须使用 `ConfirmModal`（确认/询问）或 `useAlertModal` composable（信息提示），见 `src/composables/useAlertModal.js` 与 `src/components/ConfirmModal.vue`
+- **顶部导航栏**：所有页面统一引用 `<AppNav />` 组件（`src/components/AppNav.vue`），**禁止**在 view 中复制导航栏代码。子路由（如 `/history/:taskId`）需传 `history-match="includes"` 才能让"历史记录"保持高亮
+- **历史详情失败恢复**：当主任务 `status === "FAILED"` 但 `taskUsageList` 中存在 `SUCCESS` 的子任务时，详情页会自动遍历子任务尝试恢复部分结果图（不替换 FAILED 状态，仅追加图片）
 
 ## 常见问题
 

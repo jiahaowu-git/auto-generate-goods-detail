@@ -53,15 +53,21 @@ const isSingleImageGenerateTask = computed(() => {
   return history.value?.taskType === "single-image-generate";
 });
 
+const isGenerateWithoutTextTask = computed(() => {
+  return history.value?.taskType === "generate-without-text";
+});
+
 const taskTypeText = computed(() => {
   if (isImageEditTask.value) return "单图编辑";
   if (isSingleImageGenerateTask.value) return "单图生成";
+  if (isGenerateWithoutTextTask.value) return "生成详情页-无字";
   return "生成详情页";
 });
 
 const taskTypeColor = computed(() => {
   if (isImageEditTask.value) return "bg-purple-100 text-purple-800";
   if (isSingleImageGenerateTask.value) return "bg-emerald-100 text-emerald-800";
+  if (isGenerateWithoutTextTask.value) return "bg-cyan-100 text-cyan-800";
   return "bg-indigo-100 text-indigo-800";
 });
 
@@ -365,6 +371,8 @@ function regenerate() {
     router.push("/edit-image");
   } else if (taskType === "single-image-generate") {
     router.push("/single-image-generate");
+  } else if (taskType === "generate-without-text") {
+    router.push("/generate-without-text");
   } else {
     router.push("/");
   }

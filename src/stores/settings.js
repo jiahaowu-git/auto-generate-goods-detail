@@ -52,6 +52,9 @@ export const useSettingsStore = defineStore("settings", () => {
   const goodsDetailWorkflowId = ref(
     safeGetItem("goods_detail_workflow_id", "2064943518187085825"),
   );
+  const goodsDetailWithoutTextWorkflowId = ref(
+    safeGetItem("goods_detail_without_text_workflow_id", "2065355371576913922"),
+  );
   const imageEditWorkflowId = ref(
     safeGetItem("image_edit_workflow_id", "2064943629881405441"),
   );
@@ -67,6 +70,14 @@ export const useSettingsStore = defineStore("settings", () => {
   watch(goodsDetailWorkflowId, (newValue) => {
     if (newValue) safeSetItem("goods_detail_workflow_id", newValue);
     else safeRemoveItem("goods_detail_workflow_id");
+  });
+
+  watch(goodsDetailWithoutTextWorkflowId, (newValue) => {
+    if (newValue) {
+      safeSetItem("goods_detail_without_text_workflow_id", newValue);
+    } else {
+      safeRemoveItem("goods_detail_without_text_workflow_id");
+    }
   });
 
   watch(imageEditWorkflowId, (newValue) => {
@@ -95,6 +106,14 @@ export const useSettingsStore = defineStore("settings", () => {
     goodsDetailWorkflowId.value = "";
   }
 
+  function setGoodsDetailWithoutTextWorkflowId(id) {
+    goodsDetailWithoutTextWorkflowId.value = id;
+  }
+
+  function clearGoodsDetailWithoutTextWorkflowId() {
+    goodsDetailWithoutTextWorkflowId.value = "";
+  }
+
   function setImageEditWorkflowId(id) {
     imageEditWorkflowId.value = id;
   }
@@ -114,12 +133,15 @@ export const useSettingsStore = defineStore("settings", () => {
   return {
     apiKey,
     goodsDetailWorkflowId,
+    goodsDetailWithoutTextWorkflowId,
     imageEditWorkflowId,
     singleImageGenerateWorkflowId,
     setApiKey,
     clearApiKey,
     setGoodsDetailWorkflowId,
     clearGoodsDetailWorkflowId,
+    setGoodsDetailWithoutTextWorkflowId,
+    clearGoodsDetailWithoutTextWorkflowId,
     setImageEditWorkflowId,
     clearImageEditWorkflowId,
     setSingleImageGenerateWorkflowId,

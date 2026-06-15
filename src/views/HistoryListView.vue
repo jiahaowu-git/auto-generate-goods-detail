@@ -109,6 +109,8 @@ function getStatusColor(status) {
 function getTaskTypeText(taskType) {
   if (taskType === "image-edit") return "单图编辑";
   if (taskType === "single-image-generate") return "单图生成";
+  if (taskType === "generate-without-text") return "生成详情页-无字";
+  if (taskType === "generate") return "生成详情页";
   return "生成详情页";
 }
 
@@ -116,6 +118,7 @@ function getTaskTypeColor(taskType) {
   if (taskType === "image-edit") return "bg-purple-100 text-purple-800";
   if (taskType === "single-image-generate")
     return "bg-emerald-100 text-emerald-800";
+  if (taskType === "generate-without-text") return "bg-cyan-100 text-cyan-800";
   return "bg-indigo-100 text-indigo-800";
 }
 </script>

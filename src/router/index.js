@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import SettingsView from "../views/SettingsView.vue";
 import GenerateView from "../views/GenerateView.vue";
+import GenerateWithoutTextView from "../views/GenerateWithoutTextView.vue";
 import EditImageView from "../views/EditImageView.vue";
 import HistoryListView from "../views/HistoryListView.vue";
 import HistoryDetailView from "../views/HistoryDetailView.vue";
@@ -11,6 +12,11 @@ const routes = [
     path: "/",
     name: "generate",
     component: GenerateView,
+  },
+  {
+    path: "/generate-without-text",
+    name: "generate-without-text",
+    component: GenerateWithoutTextView,
   },
   {
     path: "/single-image-generate",

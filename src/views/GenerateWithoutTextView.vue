@@ -122,8 +122,8 @@ const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
 const queueWarningMessage = ref("");
 
 const hasApiKey = computed(() => !!settingsStore.apiKey);
-const hasGoodsDetailWorkflowId = computed(
-  () => !!settingsStore.goodsDetailWorkflowId,
+const hasGoodsDetailWithoutTextWorkflowId = computed(
+  () => !!settingsStore.goodsDetailWithoutTextWorkflowId,
 );
 
 const imageRatioOptions = [
@@ -194,7 +194,7 @@ async function startGeneration() {
     return;
   }
 
-  if (!hasGoodsDetailWorkflowId.value) {
+  if (!hasGoodsDetailWithoutTextWorkflowId.value) {
     showAlert("无法提交", "请先在设置页面配置 Workflow ID。");
     return;
   }
@@ -234,7 +234,7 @@ async function startGeneration() {
     statusMessage.value = "正在提交任务...";
     taskId.value = await submitTask(
       nodeInfoList,
-      settingsStore.goodsDetailWorkflowId,
+      settingsStore.goodsDetailWithoutTextWorkflowId,
       settingsStore.apiKey,
     );
 
@@ -244,7 +244,7 @@ async function startGeneration() {
       taskId.value,
       formData.value,
       imageUrls.value,
-      "generate",
+      "generate-without-text",
     );
 
     router.push(`/history/${taskId.value}`);
@@ -274,7 +274,7 @@ function handleCloseQueueWarning() {
 
     <main class="max-w-4xl mx-auto px-4 py-8">
       <div
-        v-if="!hasApiKey || !hasGoodsDetailWorkflowId"
+        v-if="!hasApiKey || !hasGoodsDetailWithoutTextWorkflowId"
         class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8"
       >
         <p class="text-yellow-800">
@@ -283,8 +283,12 @@ function handleCloseQueueWarning() {
             >设置页面</router-link
           >
           <span v-if="!hasApiKey">配置您的 API Key</span>
-          <span v-if="!hasApiKey && !hasGoodsDetailWorkflowId"> 和 </span>
-          <span v-if="!hasGoodsDetailWorkflowId">配置 Workflow ID</span>
+          <span v-if="!hasApiKey && !hasGoodsDetailWithoutTextWorkflowId">
+            和
+          </span>
+          <span v-if="!hasGoodsDetailWithoutTextWorkflowId"
+            >配置 Workflow ID</span
+          >
         </p>
       </div>
 
@@ -451,7 +455,7 @@ function handleCloseQueueWarning() {
               @click="startGeneration"
               :disabled="
                 !hasApiKey ||
-                !hasGoodsDetailWorkflowId ||
+                !hasGoodsDetailWithoutTextWorkflowId ||
                 imageFiles.length === 0 ||
                 !formData.goods_name
               "

@@ -195,7 +195,7 @@ auto-generate-goods-detail/
 - **跳转前 await**：所有"提交任务后跳转详情页"流程必须 `await store.addHistory()`，否则会因 IDB 写入未完成导致详情页查询失败
 - **统一提示**：业务中**禁止**使用浏览器原生 `alert` / `confirm`；必须使用 `ConfirmModal`（确认/询问）或 `useAlertModal` composable（信息提示），见 `src/composables/useAlertModal.js` 与 `src/components/ConfirmModal.vue`
 - **顶部导航栏**：所有页面统一引用 `<AppNav />` 组件（`src/components/AppNav.vue`），**禁止**在 view 中复制导航栏代码。子路由（如 `/history/:taskId`）需传 `history-match="includes"` 才能让"历史记录"保持高亮
-- **历史详情失败恢复**：当主任务 `status === "FAILED"` 但 `taskUsageList` 中存在 `SUCCESS` 的子任务时，详情页会自动遍历子任务尝试恢复部分结果图（不替换 FAILED 状态，仅追加图片）
+- **历史详情失败恢复**：当主任务 `status === "FAILED"` 但 `taskUsageList` 中存在 `SUCCESS` 的子任务时，详情页会自动遍历子任务尝试恢复部分结果图（不替换 FAILED 状态，仅追加图片）。三条 FAILED 入口路径（`onMounted` 进入详情页 / 轮询中状态变更 / 轮询中 API 抛出 `apiCode` 业务错误）均已覆盖恢复逻辑
 
 ## 常见问题
 

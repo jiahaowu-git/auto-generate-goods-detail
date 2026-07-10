@@ -615,12 +615,12 @@ async function startEdit() {
     statusMessage.value = "正在提交任务...";
     const nodeInfoList = [
       {
-        nodeId: "2",
+        nodeId: "37",
         fieldName: "url",
         fieldValue: imageUrl.value,
       },
       {
-        nodeId: "5",
+        nodeId: "38",
         fieldName: "text",
         fieldValue: formData.value.editContent,
       },

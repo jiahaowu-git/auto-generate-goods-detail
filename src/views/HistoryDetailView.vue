@@ -158,6 +158,7 @@ onMounted(async () => {
   } else if (currentStatus.value === "FAILED") {
     errorMessage.value = history.value.errorMessage || "任务执行失败";
     statusMessage.value = "任务失败";
+    await fetchResults();
   } else {
     statusMessage.value = "正在查询任务状态...";
     await startPolling();
@@ -238,12 +239,34 @@ async function startPolling() {
         pollingInterval.value = null;
         // 标记任务为 FAILED
         currentStatus.value = "FAILED";
-        historyStore.updateHistoryStatus(taskId, "FAILED", []).catch((err) => {
-          console.error("[history] 更新状态失败：", err);
-        });
         if (history.value) {
           history.value.status = "FAILED";
         }
+
+        // 尝试从子任务恢复部分结果
+        // queryTaskStatus 抛出 apiCode 错误时只保留了 errorCode/errorMessage，
+        // 完整响应（taskUsageList 等）丢失，需要重新调用 queryTaskResult
+        // （该函数不抛 FAILED，可安全拉取完整结果）来尝试恢复。
+        try {
+          const taskResult = await queryTaskResult(
+            taskId,
+            settingsStore.apiKey,
+          );
+          const recovered = await tryRecoverPartialResults(taskResult);
+          if (recovered) {
+            return;
+          }
+        } catch (recoverErr) {
+          console.warn(
+            "[history] 轮询失败恢复时查询子任务结果失败：",
+            recoverErr,
+          );
+        }
+
+        // 恢复失败或无子任务结果，按原逻辑处理
+        historyStore.updateHistoryStatus(taskId, "FAILED", []).catch((err) => {
+          console.error("[history] 更新状态失败：", err);
+        });
         // 显示明确的工作流错误提示
         const codeText = error.code ? `（code ${error.code}）` : "";
         const msg = error.message || "工作流错误";

@@ -1,6 +1,6 @@
 # 自动生成产品详情页
 
-> 基于 RunningHub AI 工作流的产品详情页批量生成工具。支持详情页生成、无文字详情页生成、单图生成、单图编辑（带遮罩）四种模式，并提供完整的历史记录与设置管理。
+> 基于 RunningHub AI 工作流的产品详情页批量生成工具。支持详情页生成、无文字详情页生成、单图生成、单图编辑（带遮罩）、移除背景五种模式，并提供完整的历史记录与设置管理。
 
 ## 项目简介
 
@@ -10,12 +10,13 @@
 - **生成详情图场景**：与详情页生成使用相同表单，但调用"无文字"工作流，输出无文字叠加的详情图
 - **单图生成**：基于 1-6 张参考图与提示词生成单张 AI 图片
 - **单图编辑**：上传单张图片 + 文字描述，支持画笔遮罩局部重绘
+- **移除背景**：上传单张图片 + 输入英文主体关键词（如 `human`），调用"移除背景"工作流输出透明背景图
 
 所有任务自动持久化到本地，任务状态实时轮询，结果图片可一键打包下载。
 
 ## 功能特性
 
-- 🎨 **四种生成模式**：详情页生成 / 无文字详情页 / 单图生成 / 单图编辑（带遮罩编辑器）
+- 🎨 **五种生成模式**：详情页生成 / 无文字详情页 / 单图生成 / 单图编辑（带遮罩编辑器）/ 移除背景
 - 🖌️ **遮罩编辑器**：圆形/方形画笔、透明度/颜色/大小可调、支持撤销（Ctrl+Z）
 - 📦 **批量管理**：最多 6 张图片、详情页字段齐全（品牌、人群、主题、风格等）
 - 📥 **一键下载**：将生成结果打包为 ZIP 下载
@@ -104,6 +105,7 @@ auto-generate-goods-detail/
 │   │   ├── GenerateWithoutTextView.vue # 无文字详情页生成
 │   │   ├── SingleImageGenerateView.vue # 单图生成
 │   │   ├── EditImageView.vue           # 单图编辑（含遮罩）
+│   │   ├── BackgroundRemoval.vue       # 移除背景
 │   │   ├── HistoryListView.vue         # 历史列表
 │   │   ├── HistoryDetailView.vue       # 历史详情（含轮询 + 失败恢复）
 │   │   └── SettingsView.vue            # 配置
@@ -120,8 +122,10 @@ auto-generate-goods-detail/
 | 路径 | 组件 | 说明 |
 |---|---|---|
 | `/` | GenerateView | 详情页生成页 |
+| `/generate-without-text` | GenerateWithoutTextView | 无文字详情页生成页 |
 | `/single-image-generate` | SingleImageGenerateView | 单图生成 |
 | `/edit-image` | EditImageView | 单图编辑（含遮罩） |
+| `/background-removal` | BackgroundRemoval | 移除背景 |
 | `/history` | HistoryListView | 历史记录列表 |
 | `/history/:taskId` | HistoryDetailView | 历史详情（实时轮询） |
 | `/settings` | SettingsView | API 配置 |
@@ -135,6 +139,7 @@ auto-generate-goods-detail/
    - **无文字商品详情 Workflow ID**（默认 `2065355371576913922`）
    - **单图编辑 Workflow ID**（默认 `2064943629881405441`）
    - **单图生成 Workflow ID**（默认 `2064943676937297921`）
+   - **移除背景 Workflow ID**（默认 `2080116051123204098`）
 3. 点击 **保存配置**（写入 localStorage）
 4. 返回首页即可开始生成
 
@@ -150,6 +155,9 @@ auto-generate-goods-detail/
 | `generate-without-text` | 生成详情场景 | cyan | `/generate-without-text` | GenerateWithoutTextView |
 | `single-image-generate` | 单图生成 | emerald | `/single-image-generate` | SingleImageGenerateView |
 | `image-edit` | 单图编辑 | purple | `/edit-image` | EditImageView |
+| `background-removal` | 移除背景 | pink | `/background-removal` | BackgroundRemoval |
+
+> 历史详情页通过 `taskId` 在 store 中查找任务。`route.params.taskId` 是 string，而 RunningHub 返回的 taskId 可能是 number，因此 `getHistoryByTaskIdSync` 在比较时会统一 `String(...)`，避免类型不匹配导致"未找到该任务记录"。
 
 ## 工作流节点说明
 
@@ -176,6 +184,11 @@ auto-generate-goods-detail/
 
 - 节点 2：原图 URL
 - 节点 5：修改内容文本
+
+### 移除背景（[BackgroundRemoval.vue](src/views/BackgroundRemoval.vue) `buildNodeInfoList`）
+
+- 节点 3：原图 URL（`fieldName: "url"`）
+- 节点 10：主体/产品英文关键词（`fieldName: "value"`）
 
 ## 客户端存储
 

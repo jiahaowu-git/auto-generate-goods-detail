@@ -26,6 +26,7 @@ const links = [
   { to: "/generate-without-text", label: "生成详情页-无字" },
   { to: "/single-image-generate", label: "单图生成" },
   { to: "/edit-image", label: "单图编辑" },
+  { to: "/background-removal", label: "移除背景" },
   { to: "/history", label: "历史记录" },
   { to: "/settings", label: "设置" },
 ];

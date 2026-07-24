@@ -57,10 +57,15 @@ const isGenerateWithoutTextTask = computed(() => {
   return history.value?.taskType === "generate-without-text";
 });
 
+const isBackgroundRemovalTask = computed(() => {
+  return history.value?.taskType === "background-removal";
+});
+
 const taskTypeText = computed(() => {
   if (isImageEditTask.value) return "单图编辑";
   if (isSingleImageGenerateTask.value) return "单图生成";
   if (isGenerateWithoutTextTask.value) return "生成详情页-无字";
+  if (isBackgroundRemovalTask.value) return "移除背景";
   return "生成详情页";
 });
 
@@ -68,11 +73,13 @@ const taskTypeColor = computed(() => {
   if (isImageEditTask.value) return "bg-purple-100 text-purple-800";
   if (isSingleImageGenerateTask.value) return "bg-emerald-100 text-emerald-800";
   if (isGenerateWithoutTextTask.value) return "bg-cyan-100 text-cyan-800";
+  if (isBackgroundRemovalTask.value) return "bg-pink-100 text-pink-800";
   return "bg-indigo-100 text-indigo-800";
 });
 
 const taskTitle = computed(() => {
   if (isImageEditTask.value) return "单图编辑";
+  if (isBackgroundRemovalTask.value) return "移除背景";
   if (isSingleImageGenerateTask.value) {
     return history.value?.prompt || "未命名任务";
   }
@@ -751,6 +758,30 @@ async function tryRecoverPartialResults(taskResult) {
                   :key="index"
                   :src="url"
                   class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200 hover:border-indigo-400 transition-colors"
+                />
+              </div>
+            </div>
+          </template>
+          <template v-else-if="isBackgroundRemovalTask">
+            <div v-if="history.prompt" class="bg-gray-50 rounded-lg p-6 mb-6">
+              <label class="block text-sm font-medium text-gray-500 mb-3"
+                >主体/产品 (英文)</label
+              >
+              <p class="text-gray-800 leading-relaxed">
+                {{ history.prompt }}
+              </p>
+            </div>
+
+            <div v-if="history.imageUrls && history.imageUrls.length > 0">
+              <label class="block text-sm font-medium text-gray-500 mb-3"
+                >原图</label
+              >
+              <div class="flex gap-3 flex-wrap">
+                <img
+                  v-for="(url, index) in history.imageUrls"
+                  :key="index"
+                  :src="url"
+                  class="max-w-md max-h-64 object-contain rounded-lg border-2 border-gray-200"
                 />
               </div>
             </div>

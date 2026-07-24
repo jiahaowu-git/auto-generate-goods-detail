@@ -69,6 +69,7 @@ function truncateText(text, maxLength = 20) {
 }
 
 function getTaskName(item) {
+  if (item.taskType === "background-removal") return "移除背景";
   if (item.taskType === "single-image-generate") {
     return truncateText(item.prompt, 20) || "未命名";
   }
@@ -111,6 +112,7 @@ function getTaskTypeText(taskType) {
   if (taskType === "single-image-generate") return "单图生成";
   if (taskType === "generate-without-text") return "生成详情页-无字";
   if (taskType === "generate") return "生成详情页";
+  if (taskType === "background-removal") return "移除背景";
   return "生成详情页";
 }
 
@@ -119,6 +121,7 @@ function getTaskTypeColor(taskType) {
   if (taskType === "single-image-generate")
     return "bg-emerald-100 text-emerald-800";
   if (taskType === "generate-without-text") return "bg-cyan-100 text-cyan-800";
+  if (taskType === "background-removal") return "bg-pink-100 text-pink-800";
   return "bg-indigo-100 text-indigo-800";
 }
 </script>
@@ -218,6 +221,15 @@ function getTaskTypeColor(taskType) {
               <div class="space-y-2 text-sm text-gray-600">
                 <div v-if="item.prompt" class="line-clamp-2">
                   <span class="font-medium">用户提示：</span>{{ item.prompt }}
+                </div>
+              </div>
+            </template>
+            <template v-else-if="item.taskType === 'background-removal'">
+              <h3 class="text-lg font-bold text-gray-800 mb-2">移除背景</h3>
+              <div class="space-y-2 text-sm text-gray-600">
+                <div v-if="item.prompt" class="line-clamp-2">
+                  <span class="font-medium">主体/产品 (英文)：</span
+                  >{{ item.prompt }}
                 </div>
               </div>
             </template>

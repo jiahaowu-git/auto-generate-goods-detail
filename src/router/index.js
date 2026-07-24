@@ -6,6 +6,7 @@ import EditImageView from "../views/EditImageView.vue";
 import HistoryListView from "../views/HistoryListView.vue";
 import HistoryDetailView from "../views/HistoryDetailView.vue";
 import SingleImageGenerateView from "../views/SingleImageGenerateView.vue";
+import BackgroundRemoval from "../views/BackgroundRemoval.vue";
 
 const routes = [
   {
@@ -27,6 +28,11 @@ const routes = [
     path: "/edit-image",
     name: "edit-image",
     component: EditImageView,
+  },
+  {
+    path: "/background-removal",
+    name: "background-removal",
+    component: BackgroundRemoval,
   },
   {
     path: "/settings",

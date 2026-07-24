@@ -61,6 +61,9 @@ export const useSettingsStore = defineStore("settings", () => {
   const singleImageGenerateWorkflowId = ref(
     safeGetItem("single_image_generate_workflow_id", "2064943676937297921"),
   );
+  const backgroundRemovalWorkflowId = ref(
+    safeGetItem("background_removal_wokflow_id", "2080116051123204098"),
+  );
 
   watch(apiKey, (newValue) => {
     if (newValue) safeSetItem("api_key", newValue);
@@ -88,6 +91,11 @@ export const useSettingsStore = defineStore("settings", () => {
   watch(singleImageGenerateWorkflowId, (newValue) => {
     if (newValue) safeSetItem("single_image_generate_workflow_id", newValue);
     else safeRemoveItem("single_image_generate_workflow_id");
+  });
+
+  watch(backgroundRemovalWorkflowId, (newValue) => {
+    if (newValue) safeSetItem("background_removal_wokflow_id", newValue);
+    else safeRemoveItem("background_removal_wokflow_id");
   });
 
   function setApiKey(key) {
@@ -130,12 +138,21 @@ export const useSettingsStore = defineStore("settings", () => {
     singleImageGenerateWorkflowId.value = "";
   }
 
+  function setBackgroundRemovalWorkflowId(id) {
+    backgroundRemovalWorkflowId.value = id;
+  }
+
+  function clearBackgroundRemovalWorkflowId() {
+    backgroundRemovalWorkflowId.value = "";
+  }
+
   return {
     apiKey,
     goodsDetailWorkflowId,
     goodsDetailWithoutTextWorkflowId,
     imageEditWorkflowId,
     singleImageGenerateWorkflowId,
+    backgroundRemovalWorkflowId,
     setApiKey,
     clearApiKey,
     setGoodsDetailWorkflowId,
@@ -146,6 +163,8 @@ export const useSettingsStore = defineStore("settings", () => {
     clearImageEditWorkflowId,
     setSingleImageGenerateWorkflowId,
     clearSingleImageGenerateWorkflowId,
+    setBackgroundRemovalWorkflowId,
+    clearBackgroundRemovalWorkflowId,
   };
 });
 

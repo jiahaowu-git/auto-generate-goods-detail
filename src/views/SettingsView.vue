@@ -22,6 +22,9 @@ const imageEditWorkflowId = ref(settingsStore.imageEditWorkflowId);
 const singleImageGenerateWorkflowId = ref(
   settingsStore.singleImageGenerateWorkflowId,
 );
+const backgroundRemovalWorkflowId = ref(
+  settingsStore.backgroundRemovalWorkflowId,
+);
 const appVersion = packageJson.version;
 const appAuthor = packageJson.author;
 
@@ -35,6 +38,9 @@ function saveSettings() {
   settingsStore.setSingleImageGenerateWorkflowId(
     singleImageGenerateWorkflowId.value,
   );
+  settingsStore.setBackgroundRemovalWorkflowId(
+    backgroundRemovalWorkflowId.value,
+  );
   showAlert("保存成功", "配置已保存。");
 }
 
@@ -44,11 +50,13 @@ function clearSettings() {
   goodsDetailWithoutTextWorkflowId.value = "";
   imageEditWorkflowId.value = "";
   singleImageGenerateWorkflowId.value = "";
+  backgroundRemovalWorkflowId.value = "";
   settingsStore.clearApiKey();
   settingsStore.clearGoodsDetailWorkflowId();
   settingsStore.clearGoodsDetailWithoutTextWorkflowId();
   settingsStore.clearImageEditWorkflowId();
   settingsStore.clearSingleImageGenerateWorkflowId();
+  settingsStore.clearBackgroundRemovalWorkflowId();
   showAlert("清除成功", "配置已清除。");
 }
 </script>
@@ -126,6 +134,18 @@ function clearSettings() {
             <template #helper>
               <span class="text-sm text-gray-500">
                 在 RunningHub 平台的工作流模板中获取，用于单图生成
+              </span>
+            </template>
+          </BaseInput>
+
+          <BaseInput
+            v-model="backgroundRemovalWorkflowId"
+            label="移除背景 Workflow ID"
+            placeholder="请输入工作流 ID"
+          >
+            <template #helper>
+              <span class="text-sm text-gray-500">
+                在 RunningHub 平台的工作流模板中获取，用于移除图片背景
               </span>
             </template>
           </BaseInput>

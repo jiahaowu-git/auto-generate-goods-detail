@@ -11,14 +11,23 @@
  *   - totalCurrentTasks：总任务数（字符串）
  */
 
-const BASE_URL = "https://www.runninghub.ai";
+import { useSettingsStore } from "../stores/settings";
+
+/**
+ * 当前选中的基础 URL。从 settings store 派生，跟随用户在 SettingsView 选择的
+ * 国内站 / 国际站切换。
+ */
+function getBaseUrl() {
+  // 在每个调用现场读取 store，避免模块加载顺序问题
+  return useSettingsStore().getCurrentBaseUrl();
+}
 
 /**
  * 查询队列状态原始数据。
  * @returns {Promise<{apiKeyType: string, concurrentLimit: number, runningCount: string, queuedCount: string, totalCurrentTasks: string}>}
  */
 export async function queryQueueStatus(apiKey) {
-  const response = await fetch(`${BASE_URL}/openapi/v2/queue/status`, {
+  const response = await fetch(`${getBaseUrl()}/openapi/v2/queue/status`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${apiKey}`,

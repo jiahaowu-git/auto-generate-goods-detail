@@ -1,16 +1,27 @@
-const BASE_URL = "https://www.runninghub.ai";
+import { useSettingsStore } from "../stores/settings";
+
+/**
+ * 当前选中的基础 URL。从 settings store 派生，跟随用户在 SettingsView 选择的
+ * 国内站 / 国际站切换。
+ */
+function getBaseUrl() {
+  return useSettingsStore().getCurrentBaseUrl();
+}
 
 export async function uploadFile(file, apiKey) {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${BASE_URL}/openapi/v2/media/upload/binary`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
+  const response = await fetch(
+    `${getBaseUrl()}/openapi/v2/media/upload/binary`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: formData,
     },
-    body: formData,
-  });
+  );
 
   if (!response.ok) {
     throw new Error("文件上传失败");
@@ -25,7 +36,7 @@ export async function uploadFile(file, apiKey) {
 }
 
 export async function submitTask(nodeInfoList, workflowId, apiKey) {
-  const response = await fetch(`${BASE_URL}/task/openapi/create`, {
+  const response = await fetch(`${getBaseUrl()}/task/openapi/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -59,7 +70,7 @@ export async function submitTask(nodeInfoList, workflowId, apiKey) {
  * 业务错误（任务 FAILED）会以 apiCode: true 抛出，调用方可据此区分网络异常与业务异常。
  */
 export async function queryTaskStatus(taskId, apiKey) {
-  const response = await fetch(`${BASE_URL}/openapi/v2/query`, {
+  const response = await fetch(`${getBaseUrl()}/openapi/v2/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,7 +97,7 @@ export async function queryTaskStatus(taskId, apiKey) {
 }
 
 export async function cancelTask(taskId, apiKey) {
-  const response = await fetch(`${BASE_URL}/task/openapi/cancel`, {
+  const response = await fetch(`${getBaseUrl()}/task/openapi/cancel`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -111,7 +122,7 @@ export async function cancelTask(taskId, apiKey) {
 }
 
 export async function queryTaskResult(taskId, apiKey) {
-  const response = await fetch(`${BASE_URL}/openapi/v2/query`, {
+  const response = await fetch(`${getBaseUrl()}/openapi/v2/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

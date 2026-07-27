@@ -22,7 +22,8 @@
 - 📥 **一键下载**：将生成结果打包为 ZIP 下载
 - 📋 **历史记录**：所有任务自动保存，可查看状态、重新进入详情、删除/清空、按 taskType 分类显示
 - 💾 **本地存储**：配置存 localStorage、历史存 IndexedDB（GB 级容量）
-- 🧩 **组件化架构**：顶部导航栏（`AppNav`）、确认弹窗（`ConfirmModal`）、全局加载遮罩（`LoadingOverlay`）等可复用组件
+- 🧩 **组件化架构**：顶部导航栏（`AppNav`）、确认弹窗（`ConfirmModal`）、全局加载遮罩（`LoadingOverlay`）、基础 UI 组件（`BaseButton` / `BaseInput` / `BaseRadio` / `BaseCard`）等可复用组件
+- 🌐 **多站点支持**：可在 Settings 切换国内站 / 国际站，影响所有后续 API 请求的 base_url
 - 🔔 **统一提示**：所有用户提示均走 `useAlertModal` + `ConfirmModal`，无浏览器原生 alert/confirm
 
 ## 技术栈
@@ -83,7 +84,7 @@ auto-generate-goods-detail/
 ├── public/                     # 静态资源（favicon、logo）
 ├── src/
 │   ├── components/             # 通用组件
-│   │   ├── ui/                 # 基础 UI 组件（BaseButton、BaseInput 等）
+│   │   ├── ui/                 # 基础 UI 组件（BaseButton / BaseInput / BaseRadio / BaseCard）
 │   │   ├── AppNav.vue          # 顶部导航栏公共组件（吸顶 + 路由高亮）
 │   │   ├── ConfirmModal.vue    # 通用确认/提示弹窗
 │   │   └── LoadingOverlay.vue  # 全局加载遮罩
@@ -97,7 +98,7 @@ auto-generate-goods-detail/
 │   │   ├── queue.js            # 队列容量检查
 │   │   └── runninghub.js       # RunningHub API 客户端
 │   ├── stores/
-│   │   └── settings.js         # 配置（localStorage）+ 历史（IndexedDB）
+│   │   └── settings.js         # 配置（localStorage，含 rh_id 站点选择）+ 历史（IndexedDB）
 │   ├── styles/
 │   │   └── common.css          # 全局样式
 │   ├── views/                  # 页面组件
@@ -108,7 +109,7 @@ auto-generate-goods-detail/
 │   │   ├── BackgroundRemoval.vue       # 移除背景
 │   │   ├── HistoryListView.vue         # 历史列表
 │   │   ├── HistoryDetailView.vue       # 历史详情（含轮询 + 失败恢复）
-│   │   └── SettingsView.vue            # 配置
+│   │   └── SettingsView.vue            # 配置（含站点选择）
 │   ├── App.vue
 │   └── main.js                 # 入口：openDB → migrate → mount
 ├── index.html
@@ -133,7 +134,7 @@ auto-generate-goods-detail/
 ## 首次使用配置
 
 1. 打开应用
-2. 进入 **设置** 页面，填写：
+2. 进入 **设置** 页面，先选择**站点**（国内站 / 国际站，默认国际站 `runninghub.ai`），再填写：
    - **RunningHub API Key**（必填，存 localStorage）
    - **商品详情 Workflow ID**（默认 `2064943518187085825`）
    - **无文字商品详情 Workflow ID**（默认 `2065355371576913922`）
@@ -143,7 +144,19 @@ auto-generate-goods-detail/
 3. 点击 **保存配置**（写入 localStorage）
 4. 返回首页即可开始生成
 
-> Workflow ID 提供默认值（首次启动可开箱即用），可在设置页修改。API Key 必须由用户手动填写。两者均在 [RunningHub](https://www.runninghub.ai) 平台获取。
+> 站点选择影响所有 API 请求的 base_url（持久化为 `rh_id`，值 `cn` / `ai`）。切换立即生效，无需刷新页面。Workflow ID 提供默认值（首次启动可开箱即用），可在设置页修改。API Key 必须由用户手动填写。三者均在 [RunningHub](https://www.runninghub.ai) 平台获取。
+
+### 站点选择（rh_id / rhSites）
+
+| ID | 中文名 | base_url |
+|---|---|---|
+| `cn` | 国内站 | `https://www.runninghub.cn` |
+| `ai` | 国际站 | `https://www.runninghub.ai` |
+
+- 默认值：`ai`（国际站）
+- 持久化：`localStorage["rh_id"]`
+- 兼容性：旧版本若曾存 `"AI"` / `"CN"`（大写），store 初始化时会自动归一化为小写
+- 所有 API 客户端通过 `useSettingsStore().getCurrentBaseUrl()` 派生当前 base_url
 
 ### 任务类型（taskType）分类
 
@@ -207,7 +220,9 @@ auto-generate-goods-detail/
 - **IndexedDB 写入**：db.js 层用 `toPlain()` 防御性深克隆，剥离 Vue 响应式 Proxy，避免 `DataCloneError`
 - **跳转前 await**：所有"提交任务后跳转详情页"流程必须 `await store.addHistory()`，否则会因 IDB 写入未完成导致详情页查询失败
 - **统一提示**：业务中**禁止**使用浏览器原生 `alert` / `confirm`；必须使用 `ConfirmModal`（确认/询问）或 `useAlertModal` composable（信息提示），见 `src/composables/useAlertModal.js` 与 `src/components/ConfirmModal.vue`
-- **顶部导航栏**：所有页面统一引用 `<AppNav />` 组件（`src/components/AppNav.vue`），**禁止**在 view 中复制导航栏代码。子路由（如 `/history/:taskId`）需传 `history-match="includes"` 才能让"历史记录"保持高亮
+- 顶部导航栏：所有页面统一引用 `<AppNav />` 组件（`src/components/AppNav.vue`），**禁止**在 view 中复制导航栏代码。子路由（如 `/history/:taskId`）需传 `history-match="includes"` 才能让"历史记录"保持高亮
+- 基础 UI 组件：所有页面统一使用 `src/components/ui/` 下的 `BaseButton` / `BaseInput` / `BaseRadio` / `BaseCard`。**禁止**在 view 中散写 `<button>` / `<input class="...">` / 自制 radio 等，已有的旧实现应渐进迁移
+- API 基址：所有 HTTP 请求必须通过 `useSettingsStore().getCurrentBaseUrl()` 获取当前 base_url，**禁止**在 service 文件中再定义 `const BASE_URL = ...` 常量。这样用户切换站点后所有调用立即跟随
 - **历史详情失败恢复**：当主任务 `status === "FAILED"` 但 `taskUsageList` 中存在 `SUCCESS` 的子任务时，详情页会自动遍历子任务尝试恢复部分结果图（不替换 FAILED 状态，仅追加图片）。三条 FAILED 入口路径（`onMounted` 进入详情页 / 轮询中状态变更 / 轮询中 API 抛出 `apiCode` 业务错误）均已覆盖恢复逻辑
 
 ## 常见问题

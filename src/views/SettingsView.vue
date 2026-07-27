@@ -4,6 +4,7 @@ import { useSettingsStore } from "../stores/settings";
 import { useAlertModal } from "../composables/useAlertModal";
 import BaseCard from "../components/ui/BaseCard.vue";
 import BaseInput from "../components/ui/BaseInput.vue";
+import BaseRadio from "../components/ui/BaseRadio.vue";
 import BaseButton from "../components/ui/BaseButton.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import AppNav from "../components/AppNav.vue";
@@ -14,6 +15,13 @@ const { showAlertModal, alertTitle, alertMessage, showAlert, closeAlert } =
   useAlertModal();
 
 const apiKey = ref(settingsStore.apiKey);
+// 站点选择：组件内本地副本（v-model），保存时再同步到 store。
+const rhId = ref(settingsStore.rhId);
+// 把 store 的 rhSites 映射成 BaseRadio 的 { value, label }。
+const rhOptions = settingsStore.rhSites.map((s) => ({
+  value: s.id,
+  label: s.title,
+}));
 const goodsDetailWorkflowId = ref(settingsStore.goodsDetailWorkflowId);
 const goodsDetailWithoutTextWorkflowId = ref(
   settingsStore.goodsDetailWithoutTextWorkflowId,
@@ -30,6 +38,7 @@ const appAuthor = packageJson.author;
 
 function saveSettings() {
   settingsStore.setApiKey(apiKey.value);
+  settingsStore.setRhId(rhId.value);
   settingsStore.setGoodsDetailWorkflowId(goodsDetailWorkflowId.value);
   settingsStore.setGoodsDetailWithoutTextWorkflowId(
     goodsDetailWithoutTextWorkflowId.value,
@@ -46,6 +55,7 @@ function saveSettings() {
 
 function clearSettings() {
   apiKey.value = "";
+  rhId.value = settingsStore.rhId; // 清除时不在 UI 改 rhId，只清 Workflow IDs
   goodsDetailWorkflowId.value = "";
   goodsDetailWithoutTextWorkflowId.value = "";
   imageEditWorkflowId.value = "";
@@ -70,6 +80,19 @@ function clearSettings() {
         <h2 class="text-2xl font-bold text-gray-900 mb-8">API 配置</h2>
 
         <div class="space-y-8">
+          <BaseRadio
+            v-model="rhId"
+            :options="rhOptions"
+            name="rh-site"
+            label="站点选择"
+          >
+            <template #helper>
+              <span class="text-sm text-gray-500">
+                切换站点后会立即生效，影响所有后续请求的 base_url。
+              </span>
+            </template>
+          </BaseRadio>
+
           <BaseInput
             v-model="apiKey"
             type="password"
@@ -80,7 +103,7 @@ function clearSettings() {
               <span class="text-sm text-gray-500">
                 在
                 <a
-                  href="https://www.runninghub.ai"
+                  :href="settingsStore.getCurrentBaseUrl()"
                   target="_blank"
                   class="text-indigo-600 hover:underline"
                   >RunningHub</a

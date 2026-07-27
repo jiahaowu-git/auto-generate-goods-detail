@@ -49,6 +49,18 @@ function safeRemoveItem(key) {
 export const useSettingsStore = defineStore("settings", () => {
   // api_key 不再硬编码默认值，首次启动时为空，强制用户在设置页填写
   const apiKey = ref(safeGetItem("api_key", ""));
+  // 站点选择（固定枚举：国内站 / 国际站）。rh_sites 不参与持久化（仅常量）；
+  // rh_id 持久化到 localStorage，默认 "ai"（国际站）。
+  // 旧版本曾用大写 "AI"/"CN"，此处统一规范化为小写并立即写回。
+  function normalizeRhId(raw) {
+    const lower = (raw || "").toLowerCase();
+    return lower === "cn" || lower === "ai" ? lower : "ai";
+  }
+  const rhSites = [
+    { id: "cn", title: "国内站", base_url: "https://www.runninghub.cn" },
+    { id: "ai", title: "国际站", base_url: "https://www.runninghub.ai" },
+  ];
+  const rhId = ref(normalizeRhId(safeGetItem("rh_id", "ai")));
   const goodsDetailWorkflowId = ref(
     safeGetItem("goods_detail_workflow_id", "2064943518187085825"),
   );
@@ -68,6 +80,11 @@ export const useSettingsStore = defineStore("settings", () => {
   watch(apiKey, (newValue) => {
     if (newValue) safeSetItem("api_key", newValue);
     else safeRemoveItem("api_key");
+  });
+
+  watch(rhId, (newValue) => {
+    if (newValue) safeSetItem("rh_id", newValue);
+    else safeRemoveItem("rh_id");
   });
 
   watch(goodsDetailWorkflowId, (newValue) => {
@@ -104,6 +121,21 @@ export const useSettingsStore = defineStore("settings", () => {
 
   function clearApiKey() {
     apiKey.value = "";
+  }
+
+  function setRhId(id) {
+    rhId.value = normalizeRhId(id);
+  }
+
+  /**
+   * 根据当前 rh_id 解析出要调用的 base_url。
+   * 默认回退到国际站（rhSites[1].base_url），以防止配置为未知值时整个应用宕掉。
+   * 大小写不敏感：旧数据可能存了 "AI"/"CN"，统一转小写匹配。
+   */
+  function getCurrentBaseUrl() {
+    const target = (rhId.value || "").toLowerCase();
+    const site = rhSites.find((s) => s.id.toLowerCase() === target);
+    return (site && site.base_url) || rhSites[1].base_url;
   }
 
   function setGoodsDetailWorkflowId(id) {
@@ -148,6 +180,9 @@ export const useSettingsStore = defineStore("settings", () => {
 
   return {
     apiKey,
+    rhId,
+    rhSites,
+    getCurrentBaseUrl,
     goodsDetailWorkflowId,
     goodsDetailWithoutTextWorkflowId,
     imageEditWorkflowId,
@@ -155,6 +190,7 @@ export const useSettingsStore = defineStore("settings", () => {
     backgroundRemovalWorkflowId,
     setApiKey,
     clearApiKey,
+    setRhId,
     setGoodsDetailWorkflowId,
     clearGoodsDetailWorkflowId,
     setGoodsDetailWithoutTextWorkflowId,

@@ -1,4 +1,4 @@
-const BASE_URL = "https://www.runninghub.cn";
+const BASE_URL = "https://www.runninghub.ai";
 
 export async function uploadFile(file, apiKey) {
   const formData = new FormData();

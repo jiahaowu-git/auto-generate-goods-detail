@@ -4,7 +4,7 @@
 
 ## 项目简介
 
-本工具对接 [RunningHub](https://www.runninghub.cn) 的 AI 工作流能力，帮助运营/设计人员：
+本工具对接 [RunningHub](https://www.runninghub.ai) 的 AI 工作流能力，帮助运营/设计人员：
 
 - **生成详情页**：上传 1-6 张白底产品图 + 填写产品信息，AI 自动生成详情页图片
 - **生成详情图场景**：与详情页生成使用相同表单，但调用"无文字"工作流，输出无文字叠加的详情图
@@ -143,7 +143,7 @@ auto-generate-goods-detail/
 3. 点击 **保存配置**（写入 localStorage）
 4. 返回首页即可开始生成
 
-> Workflow ID 提供默认值（首次启动可开箱即用），可在设置页修改。API Key 必须由用户手动填写。两者均在 [RunningHub](https://www.runninghub.cn) 平台获取。
+> Workflow ID 提供默认值（首次启动可开箱即用），可在设置页修改。API Key 必须由用户手动填写。两者均在 [RunningHub](https://www.runninghub.ai) 平台获取。
 
 ### 任务类型（taskType）分类
 

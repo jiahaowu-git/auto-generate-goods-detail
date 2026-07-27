@@ -80,7 +80,7 @@ function clearSettings() {
               <span class="text-sm text-gray-500">
                 在
                 <a
-                  href="https://www.runninghub.cn"
+                  href="https://www.runninghub.ai"
                   target="_blank"
                   class="text-indigo-600 hover:underline"
                   >RunningHub</a

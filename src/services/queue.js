@@ -1,7 +1,7 @@
 /**
  * 队列相关服务（提交前容量检查）。
  *
- * 接口文档：https://www.runninghub.cn/runninghub-api-doc-cn/api-432926239
+ * 接口文档：https://www.runninghub.ai/runninghub-api-doc-cn/api-432926239
  * 接口：GET /openapi/v2/queue/status
  * 响应 data 字段：
  *   - apiKeyType：KEY 类型（EXCLUSIVE / SHARED / NORMAL）
@@ -11,7 +11,7 @@
  *   - totalCurrentTasks：总任务数（字符串）
  */
 
-const BASE_URL = "https://www.runninghub.cn";
+const BASE_URL = "https://www.runninghub.ai";
 
 /**
  * 查询队列状态原始数据。

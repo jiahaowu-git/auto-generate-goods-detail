@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { Icon } from "@iconify/vue";
 import { useSettingsStore, useHistoryStore } from "../stores/settings";
 import { queryTaskStatus, queryTaskResult } from "../services/runninghub";
 import { useAlertModal } from "../composables/useAlertModal";
@@ -546,13 +547,16 @@ async function tryRecoverPartialResults(taskResult) {
             @click="refreshTask"
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 rounded-full hover:bg-indigo-50 hover:text-indigo-600 transition-colors font-medium"
           >
-            🔄 刷新
+            <Icon icon="mdi:refresh" class="inline w-4 h-4 mr-1 -mt-0.5" />刷新
           </button>
           <button
             @click="regenerate"
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors font-medium"
           >
-            ✨ 再次生成
+            <Icon
+              icon="mdi:refresh-circle"
+              class="inline w-4 h-4 mr-1 -mt-0.5"
+            />再次生成
           </button>
         </div>
       </div>
@@ -561,7 +565,9 @@ async function tryRecoverPartialResults(taskResult) {
         v-if="!history"
         class="bg-white rounded-xl shadow-lg p-12 text-center"
       >
-        <div class="text-gray-400 text-6xl mb-4">❌</div>
+        <div class="text-gray-400 text-6xl mb-4">
+          <Icon icon="mdi:alert-circle-outline" />
+        </div>
         <h3 class="text-xl font-semibold text-gray-700 mb-2">
           未找到该任务记录
         </h3>
@@ -609,12 +615,14 @@ async function tryRecoverPartialResults(taskResult) {
                 class="animate-spin w-6 h-6 border-3 border-white border-t-transparent rounded-full"
               ></div>
               <div v-else-if="currentStatus === 'SUCCESS'" class="text-2xl">
-                ✅
+                <Icon icon="mdi:check-circle" class="text-green-400" />
               </div>
               <div v-else-if="currentStatus === 'FAILED'" class="text-2xl">
-                ❌
+                <Icon icon="mdi:close-circle" class="text-red-400" />
               </div>
-              <div v-else class="text-2xl">⏳</div>
+              <div v-else class="text-2xl">
+                <Icon icon="mdi:progress-clock" />
+              </div>
               <p class="text-lg">{{ statusMessage }}</p>
             </div>
           </div>
@@ -625,7 +633,9 @@ async function tryRecoverPartialResults(taskResult) {
           class="bg-red-50 border-2 border-red-300 rounded-xl p-6 mb-6"
         >
           <div class="flex items-center gap-3">
-            <div class="text-red-500 text-3xl">❌</div>
+            <div class="text-red-500 text-3xl">
+              <Icon icon="mdi:close-circle" />
+            </div>
             <div>
               <h3 class="font-bold text-red-800 text-lg">任务执行失败</h3>
               <p class="text-red-600 mt-1">{{ errorMessage }}</p>
@@ -637,7 +647,10 @@ async function tryRecoverPartialResults(taskResult) {
           <h3
             class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2"
           >
-            <span>📋</span> 任务详情
+            <Icon
+              icon="mdi:clipboard-list-outline"
+              class="inline w-5 h-5 mr-1 -mt-0.5"
+            />任务详情
           </h3>
 
           <template v-if="isImageEditTask">
@@ -874,7 +887,10 @@ async function tryRecoverPartialResults(taskResult) {
             <h3
               class="text-2xl font-bold text-gray-800 flex items-center gap-2"
             >
-              <span>🎨</span>
+              <Icon
+                icon="mdi:image-multiple-outline"
+                class="inline w-7 h-7 mr-1 -mt-1"
+              />
               {{
                 isImageEditTask
                   ? "编辑结果"
@@ -887,8 +903,10 @@ async function tryRecoverPartialResults(taskResult) {
               @click="downloadAllImages"
               class="px-6 py-3 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors flex items-center gap-2 font-medium"
             >
-              <span>📥</span>
-              一键下载
+              <Icon
+                icon="mdi:download"
+                class="inline w-5 h-5 mr-1 -mt-0.5"
+              />一键下载
             </button>
           </div>
           <div
@@ -926,7 +944,9 @@ async function tryRecoverPartialResults(taskResult) {
           v-else-if="currentStatus !== 'SUCCESS' && currentStatus !== 'FAILED'"
           class="bg-white rounded-xl shadow-lg p-12 text-center"
         >
-          <div class="text-gray-300 text-6xl mb-4">⏳</div>
+          <div class="text-gray-300 text-6xl mb-4">
+            <Icon icon="mdi:loading" class="animate-spin" />
+          </div>
           <p class="text-gray-500">正在等待任务完成...</p>
           <p class="text-gray-400 text-sm mt-2">
             任务完成后将自动显示生成的图片
@@ -939,7 +959,9 @@ async function tryRecoverPartialResults(taskResult) {
           "
           class="bg-white rounded-xl shadow-lg p-12 text-center"
         >
-          <div class="text-gray-400 text-6xl mb-4">🖼️</div>
+          <div class="text-gray-400 text-6xl mb-4">
+            <Icon icon="mdi:image-outline" />
+          </div>
           <p class="text-gray-500">未找到生成的图片</p>
         </div>
       </template>

@@ -1,7 +1,7 @@
 {
   "name": "auto-generate-goods-detail",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "jiahaowu-git",
   "type": "module",
   "scripts": {
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.23",
+    "@iconify/vue": "^4.3.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "pinia": "^2.1.7",

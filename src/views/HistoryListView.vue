@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useHistoryStore } from "../stores/settings";
+import { Icon } from "@iconify/vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import AppNav from "../components/AppNav.vue";
 
@@ -155,7 +156,9 @@ function getTaskTypeColor(taskType) {
         v-else-if="historyStore.historyList.length === 0"
         class="bg-white rounded-xl shadow-lg p-12 text-center"
       >
-        <div class="text-gray-400 text-6xl mb-4">📋</div>
+        <div class="text-gray-400 text-6xl mb-4">
+          <Icon icon="mdi:inbox-outline" />
+        </div>
         <h3 class="text-xl font-semibold text-gray-700 mb-2">暂无历史记录</h3>
         <p class="text-gray-500 mb-6">开始生图后，记录会显示在这里</p>
         <router-link
@@ -197,7 +200,7 @@ function getTaskTypeColor(taskType) {
                 @click="deleteItem(item.id, $event)"
                 class="text-gray-400 hover:text-red-600 transition-colors"
               >
-                ✕
+                <Icon icon="mdi:close-thick" class="text-base" />
               </button>
             </div>
 

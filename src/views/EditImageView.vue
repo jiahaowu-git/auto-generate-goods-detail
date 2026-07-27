@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, nextTick, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
+import { Icon } from "@iconify/vue";
 import { useSettingsStore, useHistoryStore } from "../stores/settings";
 import {
   uploadFile,
@@ -711,7 +712,7 @@ async function startEdit() {
                 @click="openMaskEditor"
                 class="absolute bottom-2 right-2 px-3 py-1.5 bg-indigo-600/90 hover:bg-indigo-700 text-white text-xs rounded-md flex items-center gap-1 shadow-md opacity-90 hover:opacity-100"
               >
-                <span>✏️</span>
+                <Icon icon="mdi:brush-outline" class="w-3.5 h-3.5" />
                 编辑遮罩
               </button>
             </div>

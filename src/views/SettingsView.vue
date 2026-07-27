@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useSettingsStore } from "../stores/settings";
 import { useAlertModal } from "../composables/useAlertModal";
 import BaseCard from "../components/ui/BaseCard.vue";
@@ -69,6 +69,17 @@ function clearSettings() {
   settingsStore.clearBackgroundRemovalWorkflowId();
   showAlert("清除成功", "配置已清除。");
 }
+
+// 监听站点切换：若原值非空（即用户主动切换，而非初次加载），自动清空 API Key。
+// 原因：国内站与国际站的 API Key 不互通，留着旧 Key 会导致 base_url 与 Key 不匹配而报错。
+watch(rhId, (newValue, oldValue) => {
+  if (!oldValue) return; // 初次加载不触发
+  if (newValue === oldValue) return; // 没变化
+  if (!apiKey.value && !settingsStore.apiKey) return; // 本来就没 Key，不弹打扰
+  apiKey.value = "";
+  settingsStore.clearApiKey();
+  showAlert("已清空 API Key", "站点已切换，请重新填写与站点匹配的 API Key。");
+});
 </script>
 
 <template>
@@ -120,7 +131,14 @@ function clearSettings() {
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于生成商品详情页
+                在
+                <a
+                  :href="settingsStore.getCurrentBaseUrl()"
+                  target="_blank"
+                  class="text-indigo-600 hover:underline"
+                  >RunningHub</a
+                >
+                平台的工作流模板中获取，用于生成商品详情页
               </span>
             </template>
           </BaseInput>
@@ -132,7 +150,14 @@ function clearSettings() {
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于生成无文字商品详情图
+                在
+                <a
+                  :href="settingsStore.getCurrentBaseUrl()"
+                  target="_blank"
+                  class="text-indigo-600 hover:underline"
+                  >RunningHub</a
+                >
+                平台的工作流模板中获取，用于生成无文字商品详情图
               </span>
             </template>
           </BaseInput>
@@ -144,7 +169,14 @@ function clearSettings() {
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于单图编辑
+                在
+                <a
+                  :href="settingsStore.getCurrentBaseUrl()"
+                  target="_blank"
+                  class="text-indigo-600 hover:underline"
+                  >RunningHub</a
+                >
+                平台的工作流模板中获取，用于单图编辑
               </span>
             </template>
           </BaseInput>
@@ -156,7 +188,14 @@ function clearSettings() {
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于单图生成
+                在
+                <a
+                  :href="settingsStore.getCurrentBaseUrl()"
+                  target="_blank"
+                  class="text-indigo-600 hover:underline"
+                  >RunningHub</a
+                >
+                平台的工作流模板中获取，用于单图生成
               </span>
             </template>
           </BaseInput>
@@ -168,7 +207,14 @@ function clearSettings() {
           >
             <template #helper>
               <span class="text-sm text-gray-500">
-                在 RunningHub 平台的工作流模板中获取，用于移除图片背景
+                在
+                <a
+                  :href="settingsStore.getCurrentBaseUrl()"
+                  target="_blank"
+                  class="text-indigo-600 hover:underline"
+                  >RunningHub</a
+                >
+                平台的工作流模板中获取，用于移除图片背景
               </span>
             </template>
           </BaseInput>

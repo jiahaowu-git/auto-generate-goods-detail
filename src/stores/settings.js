@@ -74,7 +74,7 @@ export const useSettingsStore = defineStore("settings", () => {
     safeGetItem("single_image_generate_workflow_id", "2064943676937297921"),
   );
   const backgroundRemovalWorkflowId = ref(
-    safeGetItem("background_removal_wokflow_id", "2080116051123204098"),
+    safeGetItem("background_removal_wokflow_id", "2081552019245379585"),
   );
 
   watch(apiKey, (newValue) => {
